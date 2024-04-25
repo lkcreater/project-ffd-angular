@@ -1,0 +1,91 @@
+name: FRONT_WEB - build front-end (WEB)
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-version:
+        description: "build version"
+        required: true
+      build-env:
+        type: choice
+        options:
+          - "dev"
+          - "prod"
+        description: "build image env"
+        required: true
+
+env:
+  IMG_ADDRESS: swr.${{ secrets.SWR_REGION }}.myhuaweicloud.com
+  IMG_USERNAME: ${{ secrets.SWR_REGION }}@${{ secrets.SWR_AK_KEY }}
+  IMG_ORGANIZATION: tisco-finfreedom
+  IMG_NAME: frontweb_ffd_frontend_${{ github.event.inputs.build-env }}
+  IMG_VERSION: ${{ github.event.inputs.build-env }}-v${{ github.event.inputs.build-version }}
+  IMG_PROJECT: frontweb-ffd-frontend-dev
+  DIR_WORKING: front-end
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            node-version: [20.x]
+    
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Nodejs version ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{ matrix.node-version }}
+            - run: npm install
+              working-directory: ${{ env.DIR_WORKING }}
+            - run: npm ci --if-present
+              working-directory: ${{ env.DIR_WORKING }}
+            - run: npm run build:${{ github.event.inputs.build-env }}
+              working-directory: ${{ env.DIR_WORKING }}
+            - run: |
+                echo "Build node version: ${{ matrix.node-version }} -- ENV: ${{ github.event.inputs.build-env }}:${{ github.event.inputs.build-version }}"
+    
+    codescan:
+        runs-on: ubuntu-latest
+        needs: [build]
+        steps:
+            - name: run test 
+              if: github.event.inputs.build-env != 'dev'
+              run: echo "scan code fro testing"
+    
+            - run: echo "test done successfully"
+
+    buildimage:
+      runs-on: ubuntu-latest
+      needs: [build, codescan]
+      steps:
+          - uses: actions/checkout@v4
+          - name: setup password SWR
+            run: |
+              echo "GITENV_PASSWORD_SWR=$(printf '${{ secrets.SWR_AK_KEY }}' | openssl dgst -binary -sha256 -hmac '${{ secrets.SWR_SK_KEY }}' | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')" >> $GITHUB_ENV
+          - name: Login SWR huawei cloud
+            run: |
+              docker login -u $IMG_USERNAME -p $GITENV_PASSWORD_SWR $IMG_ADDRESS
+              echo "Login huawei cloud [SWR]"
+          - name: Build and Push image to cloud
+            working-directory: ${{ env.DIR_WORKING }}
+            run: | 
+              docker build --build-arg ENV_BUILD=${{ github.event.inputs.build-env }} -t $IMG_ADDRESS/$IMG_ORGANIZATION/$IMG_NAME:${{ env.IMG_VERSION }} .
+              docker push $IMG_ADDRESS/$IMG_ORGANIZATION/$IMG_NAME:${{ env.IMG_VERSION }}
+          - name: Logout SWR
+            run: |
+              docker logout $IMG_ADDRESS
+
+    alert:
+      runs-on: ubuntu-latest
+      needs: [buildimage]
+      steps:
+          - uses: actions/checkout@v4
+          - name: setup date
+            run: | 
+              echo "GITENV_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+              echo $GITENV_DATE
+          - name: alert LINE
+            run: |
+              curl -X GET '${{ secrets.LINE_URL }}?title=BUILD_ENV%20:%20${{ github.event.inputs.build-env }}&msg=--------------------------------------%0ABUILD%20:%20${{ env.IMG_PROJECT }}%0AVERSION%20:%20${{ env.IMG_VERSION }}%0ADATE%20:%20${{ env.GITENV_DATE }}%0A--------------------------------------'
+  

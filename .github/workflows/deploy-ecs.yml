@@ -1,0 +1,112 @@
+name: DEPLOY FRONT_WEB - FFD (WEB)
+
+on:
+    workflow_dispatch:
+        inputs:
+            build-version-tisco-web:
+                description: "FRONTWEB VERSION: front-end (web)"
+                required: true
+            build-version-tisco-api:
+                description: "FRONTWEB VERSION: back-end (api)"
+                required: true
+            build-env:
+                type: choice
+                options:
+                  - "dev"
+                  - "prod"
+                description: "build image env"
+                required: true
+
+env:
+  IMG_ADDRESS: swr.${{ secrets.SWR_REGION }}.myhuaweicloud.com
+  IMG_USERNAME: ${{ secrets.SWR_REGION }}@${{ secrets.SWR_AK_KEY }}
+  REPO_NAME: Front-Web
+  PRO_FFD_WEB: frontweb-ffd-frontend@${{ github.event.inputs.build-env }}-v${{ github.event.inputs.build-version-tisco-web }}
+  PRO_FFD_API: frontweb-ffd-backend@${{ github.event.inputs.build-env }}-v${{ github.event.inputs.build-version-tisco-api }}
+  FOLDER_CONFIG: ./deployment
+  SERVICE_COMPOSE: service-compose.yml
+
+jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: echo version
+              run: |
+                echo "ENV = ${{ github.event.inputs.build-env }}"
+                echo "WEB = ${{ github.event.inputs.build-version-tisco-web }}"
+                echo "API = ${{ github.event.inputs.build-version-tisco-api }}"
+            - name: CMD write version image
+              run: |
+                sed -i "s/<<SWR_HOST>>/$VAR_IMG_HOST/g" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/<<SWR_ENV>>/$VAR_SWR_ENV/g" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/#TISCO_WEB_VERSION#/$VAR_TISCO_WEB_VERSION/" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/#TISCO_API_VERSION#/$VAR_TISCO_API_VERSION/" ${{ env.SERVICE_COMPOSE }}
+                cat ${{ env.SERVICE_COMPOSE }}
+              env: 
+                VAR_IMG_HOST: ${{ env.IMG_ADDRESS }}
+                VAR_SWR_ENV: ${{ github.event.inputs.build-env }}
+                VAR_TISCO_WEB_VERSION: ${{ github.event.inputs.build-version-tisco-web }}
+                VAR_TISCO_API_VERSION: ${{ github.event.inputs.build-version-tisco-api }}
+
+            - name: Configure SSH
+              run: | 
+                mkdir -p ~/.ssh/
+                echo "$SSH_KEY" > ~/.ssh/KeyPair-e7ac.pem
+                chmod 600 ~/.ssh/KeyPair-e7ac.pem
+                cat >> ~/.ssh/config <<END
+                Host staging-host
+                    HostName $SSH_HOST
+                    User $SSH_USER
+                    IdentityFile ~/.ssh/KeyPair-e7ac.pem
+                    StrictHostKeyChecking no
+                END
+              env:
+                SSH_USER: ${{ secrets.SSH_USERNAME }}
+                SSH_KEY: ${{ secrets.SSH_KEY }}
+                SSH_HOST: ${{ secrets.SSH_HOST }}
+
+            - name: test whoami
+              run: ssh staging-host 'whoami'
+
+            - name: copy file folder config
+              run: scp -r ${{ env.FOLDER_CONFIG }} staging-host:~
+
+            - name: copy file service compose
+              run: scp ${{ env.SERVICE_COMPOSE }} staging-host:~
+
+            - name: setup password SWR
+              run: |
+                echo "GITENV_PASSWORD_SWR=$(printf '${{ secrets.SWR_AK_KEY }}' | openssl dgst -binary -sha256 -hmac '${{ secrets.SWR_SK_KEY }}' | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')" >> $GITHUB_ENV
+
+            - name: Docker login SWR
+              run: ssh staging-host 'docker login -u ${{ env.IMG_USERNAME }} -p ${{ env.GITENV_PASSWORD_SWR }} ${{ env.IMG_ADDRESS }}'
+
+            - name: Down service container
+              run: ssh staging-host 'docker-compose -f ${{ env.SERVICE_COMPOSE }} down'
+
+            - name: Remove image older than 10 days
+              run: ssh staging-host 'docker image prune -a --force --filter "until=240h"'
+            
+            - name: Start service container
+              run: ssh staging-host 'docker-compose -f ${{ env.SERVICE_COMPOSE }} up -d'
+
+            - name: Logout SWR
+              run: ssh staging-host 'docker logout $IMG_ADDRESS'
+
+    alert:
+        runs-on: ubuntu-latest
+        needs: [build]
+        steps:
+            - uses: actions/checkout@v4
+            - name: setup date
+              run: | 
+                echo "GITENV_DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+                echo $GITENV_DATE
+            - name: alert LINE
+              run: |
+                curl -X GET '${{ secrets.LINE_URL }}?title=DEPLOY_ENV%20${{ env.REPO_NAME }}%20:%20${{ github.event.inputs.build-env }}&msg=--------------------------------------%0ACMS%20:%20${{ env.PRO_FFD_WEB }}%0AAPI%20:%20${{ env.PRO_FFD_API }}%0ADATE%20:%20${{ env.GITENV_DATE }}%0A--------------------------------------'
+    
+
+                
