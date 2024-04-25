@@ -1,0 +1,22 @@
+<app-card-content>
+  <div class="display">
+    <app-home-banner-account></app-home-banner-account>
+    <div class="pt-4">
+      <app-home-banner></app-home-banner>
+    </div>
+    <div class="py-4">
+      <div class="grid grid-cols-2 gap-4 justify-center items-center">
+        @for (menu of homeMenuList; track $index) {
+
+        <app-home-menu
+          [label]="menu.label"
+          [icon]="menu.icon"
+          [bgColor]="menu.color"
+          [idName]="menu.id"
+        ></app-home-menu>
+
+        }
+      </div>
+    </div>
+  </div>
+</app-card-content>

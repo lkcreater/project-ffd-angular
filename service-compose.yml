@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  tisco-ffd-web:
+    image: <<SWR_HOST>>/tisco-finfreedom/frontweb_ffd_frontend_<<SWR_ENV>>:<<SWR_ENV>>-v#TISCO_WEB_VERSION#
+    container_name: tisco-ffd-web
+    ports:
+      - "4200:4000"
+    networks:
+      - host_network
+
+  tisco-ffd-api:
+    image: <<SWR_HOST>>/tisco-finfreedom/frontweb_ffd_backend_<<SWR_ENV>>:<<SWR_ENV>>-v#TISCO_API_VERSION#
+    container_name: tisco-ffd-api
+    ports:
+      - "3000:3000"
+    networks:
+      - host_network
+  
+  nginx:
+    image: nginx:1.25.3
+    expose:
+      - 80
+    ports:
+      - 80:80
+    volumes:
+      - ./deployment/nginx_dev.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - tisco-ffd-web
+      - tisco-ffd-api
+    networks:
+      - host_network
+
+networks:
+  host_network:
+    driver: bridge

@@ -1,0 +1,30 @@
+<div
+  class="w-[183px] h-[182px] bg-[#D7D7D7] rounded-full flex items-center justify-center relative"
+>
+  @if (!loading) {
+    <div class="relative w-[183px] h-[182px] overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600 shadow-lg">
+      <img
+      [src]="avatar ? avatar : 'assets/icons/default-image.svg'"
+      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-h-[182px] object-cover"
+      alt="profile"
+    />
+  </div>
+  
+  } @else {
+  <div class="ffd-loader"></div>
+  }
+  <button
+    type="button"
+    (click)="fileInput.click()"
+    class="rounded-full bg-white w-[50px] h-[50px] absolute bottom-0 right-0"
+  >
+    <span nz-icon nzType="camera" nzTheme="fill" class="text-[24px]"></span>
+  </button>
+  <input
+    #fileInput
+    type="file"
+    id="file"
+    (change)="onFileChange(fileInput.files)"
+    hidden
+  />
+</div>

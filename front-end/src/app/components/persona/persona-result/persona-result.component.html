@@ -1,0 +1,18 @@
+<div class="persona-background">
+  <div class="py-8">
+    <p class="title">คุณคือ</p>
+    <img
+      [src]="getUrl()"
+      class="mx-auto"
+      [alt]="persona.iconName"
+      [style]="{ width: '300px', height: '300px' }"
+    />
+    <p class="persona-title">{{ persona.iconName }}</p>
+    <p class="detail">
+      {{ persona.iconDetail }}
+    </p>
+  </div>
+</div>
+<div class="btn-persona">
+  <button class="btn-title" [routerLink]="['/']">เรียนรู้เพิ่มเติม</button>
+</div>

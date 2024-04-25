@@ -1,0 +1,64 @@
+<app-card-content>
+  <div class="display">
+    <div
+      class="flex flex-col gap-2 justify-items-center justify-center rounded-[20px] lg:px-0 px-4"
+    >
+      <div class="flex flex-row gap-2">
+        <button id="btn-all-ranking" class="btn-ranking w-full">
+          <div class="flex justify-center">ทั้งหมด</div>
+        </button>
+        <button id="btn-com-ranking" class="btn-ranking w-full">
+          <div class="flex justify-center">บริษัท</div>
+        </button>
+      </div>
+      <app-bg-ranking>
+        <div class="grid grid-cols-3 justify-center justify-items-center">
+          <div class="mt-24">
+            <app-card-ranking
+              size="94px"
+              src="https://www.coragi.com/wp-content/uploads/2021/06/JPG-File.png"
+              rank="2"
+            ></app-card-ranking>
+          </div>
+          <app-card-ranking
+            size="120px"
+            src="https://www.coragi.com/wp-content/uploads/2021/06/JPG-File.png"
+            rank="1"
+          ></app-card-ranking>
+          <div class="mt-24">
+            <app-card-ranking
+              size="94px"
+              src="https://www.coragi.com/wp-content/uploads/2021/06/JPG-File.png"
+              rank="3"
+            ></app-card-ranking>
+          </div>
+        </div>
+        <!-- search -->
+        <nz-form-item class="flex justify-center mt-10">
+          <nz-input-group
+            class="input-search-ranking w-8/12"
+            [nzPrefix]="prefixIcon"
+          >
+            <ng-template #prefixIcon>
+              <span
+                nz-icon
+                nzType="search"
+                nzTheme="outline"
+                class="text-[#D9D9D9] px-2 text-[24px] cursor-pointer"
+              ></span>
+            </ng-template>
+            <input
+              type="text"
+              nz-input
+              id="input-accFirstName-profile"
+              class="text-placeholder"
+            />
+          </nz-input-group>
+        </nz-form-item>
+      </app-bg-ranking>
+      <div class="my-10">
+        <app-table-ranking></app-table-ranking>
+      </div>
+    </div>
+  </div>
+</app-card-content>

@@ -1,0 +1,20 @@
+<div class="mb-7">
+  <div class="container mx-auto">
+    <nav class="flex justify-between bg-inherit py-4">
+      <!-- logo -->
+      <div>
+        <app-logo mode="dark" [routerLink]="['/']" class="cursor-pointer" />
+      </div>
+
+      <div>
+        <img src="assets/logo/logo-ffd.svg" alt="logo" />
+      </div>
+    </nav>
+  </div>
+
+  <!-- menu -->
+  @if (!hiddenMenu) {
+    <app-menu />
+  }
+</div>
+

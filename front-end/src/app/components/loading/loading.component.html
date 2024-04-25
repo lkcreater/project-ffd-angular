@@ -1,0 +1,19 @@
+<div class="grid grid-flow-row auto-rows-max">
+  <div [class]="animateClass">
+    <img class="mx-auto" [src]="imageLoading" width="150" height="150" />
+  </div>
+
+  @if (title != '') {
+    <div>
+        <h1 class="text-center text-[25px]">{{ title }}</h1>
+    </div>
+  } 
+
+  @if (desc != '') {
+    <div>
+        <h2>{{ desc }}</h2>
+    </div>
+  }
+
+  <div class="flex justify-center py-3"><div class="ffd-loader"></div></div>
+</div>

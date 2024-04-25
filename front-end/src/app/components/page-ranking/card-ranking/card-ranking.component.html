@@ -1,0 +1,21 @@
+<div class="flex flex-col justify-center text-center">
+  @if(['2','3'].includes(rank)){
+  <p class="text-[#005DA5] text-[22px]">{{ rank }}</p>
+  }
+  <span
+    nz-icon
+    [nzType]="iconName"
+    nzTheme="outline"
+    [style.color]="colorRanking"
+    [style.font-size]="sizeIcon"
+  ></span>
+  <div
+    class="flex flex-row justify-center bg-[#005DA5] rounded-full items-center"
+    [style.width]="size"
+    [style.height]="size"
+  >
+    <app-img-ranking [src]="src" [size]="size"></app-img-ranking>
+  </div>
+  <p class="text-ranking-name">คุณนกฮูก</p>
+  <p class="text-ranking-point">4000</p>
+</div>

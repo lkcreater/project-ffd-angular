@@ -1,0 +1,32 @@
+<div class="grid">
+  <h2 class="title my-5">{{ nzData.title }}</h2>
+  <div class="h-[calc(100dvh-220px)]">
+    <div class="draw-body-content">
+      <p class="content" [innerHTML]="nzData.desc"></p>
+    </div>
+  </div>
+
+  <div class="draw-footer">
+    <div class="container items-center mx-auto">
+      <div class="flex justify-center gap-3 lg:w-6/12 w-full mx-auto">
+        <button
+          id="btn-term-next"
+          type="button"
+          class="btn-app btn-gray w-full mx-auto"
+          (click)="actionReject()"
+        >
+          <span>ไม่ยินยอม</span>
+        </button>
+
+        <button
+          id="btn-term-next"
+          type="button"
+          class="btn-app btn-primary w-full mx-auto"
+          (click)="actionAccept()"
+        >
+          <span>ยินยอม</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

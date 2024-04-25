@@ -1,0 +1,52 @@
+<div class="h-dvh overflow-hidden flex items-end justify-center">
+  <div>
+    <app-card-container [isHiddenHeader]="true">
+      <div class="flex justify-center">
+        <img [src]="imgSrc"  />
+      </div>
+    </app-card-container>
+    <div
+      class="relative w-full h-[180px] overflow-hidden lg:-mt-36 md:-mt-40 sm:-mt-44 xs:-mt-28"
+    >
+      <div
+        class="absolute left-1/2 transform -translate-x-1/2 w-[1200px] h-[400px] bg-[#005DA5] rounded-[50%]"
+      >
+        <div class="w-full">
+          <div class="flex flex-col justify-center items-center">
+            <div
+              class="flex flex-row justify-center items-center w-4/12 my-5 gap-2"
+            >
+              <button
+                id="btn-welcome-signin"
+                type="button"
+                class="btn-decline-consent w-full"
+                [routerLink]="['/auth/sign-in']"
+              >
+                <div class="flex gap-2 justify-center">
+                  <span class="text-decline-consent w-full">เข้าสู่ระบบ</span>
+                </div>
+              </button>
+              <button
+                id="btn-welcome-signup"
+                type="button"
+                class="btn-accept-consent border-2 border-white hover:border-white hover:border-2 w-full"
+                [routerLink]="['/auth/chanel']"
+              >
+                <div class="flex gap-2 justify-center w-full">
+                  <span class="flex text-accept-consent w-full">ลงทะเบียน</span>
+                  <span class="flex flex-col justify-center"
+                    ><img
+                      src="assets/btn-logo/next-btn.svg"
+                      width="23px"
+                      height="12px"
+                      alt="logo"
+                  /></span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

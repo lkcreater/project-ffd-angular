@@ -1,0 +1,316 @@
+const express = require('express');
+
+const RESPONSE = require('../../../middleware/response');
+const LOGGER = require('../../../middleware/logger');
+const UTILS = require('../../../middleware/utils');
+const messages = require('../../../commons/message');
+
+const router = express.Router();
+const serviceName = 'accounts';
+
+const { AccountsService } = require('../../../services/account.service');
+const { ELoginPlatform } = require('../../../services/authen.service');
+const { Validator } = require('node-input-validator');
+const { SecretHelper } = require('../../../helpers/secret.helper');
+const { HealthCheckService } = require('../../../services/health-check.service');
+
+//-----------------------------------------------------------
+//-- get profile me
+//-----------------------------------------------------------
+router.get('/', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `Get profile me` }
+    try {
+        LOGGER.info(dataLogger);
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+        const account = await AccountsService.findAccountByUuid(uuid);
+        if (!account) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+        const peronaIcon = await HealthCheckService.getAllPersonaIconByUuid(uuid);
+
+        //-- hidden password
+        let hasPassword = false;
+        if (account.accPassword) {
+            hasPassword = true;
+        }
+        delete account.accPassword;
+        data = { hasPassword, ...account, peronaIcon };
+
+        RESPONSE.success(res, SESSION_ID, data, messages.success.getProfileSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- update account information
+//-----------------------------------------------------------
+router.put('/update-profile', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `update account information` }
+
+    try {
+        LOGGER.info(dataLogger);
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+        const account = await AccountsService.findAccount(uuid);
+        if (!account) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        const attribsAccount = {
+            accPicture: req.body?.accPicture || account.accPicture,
+            accFirstname: req.body?.accFirstname || account.accFirstname,
+            compCode: req.body?.compCode || account.compCode,
+            updatedBy: req.authen?.username || account.accFirstname,
+        };
+
+        const updated = await AccountsService.updateAccountById(
+            account?.accId,
+            attribsAccount,
+        );
+
+        RESPONSE.success(res, SESSION_ID, updated, messages.success.updateProfileSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- save forgot password
+//-----------------------------------------------------------
+router.put('/forgot-pwd', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `forgot password` }
+    try {
+        LOGGER.info(dataLogger);
+
+        //-- verify body
+        const v = new Validator(req.body,
+            { accPassword: 'required' },
+        );
+        const matched = await v.check()
+        if (!matched) {
+            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+        }
+
+        const updated = await AccountsService.changePassword(req.authen?.uuid, {
+            hash: req.body?.accPassword,
+            username: req.authen?.username,
+        });
+
+        RESPONSE.success(res, SESSION_ID, updated, messages.success.forgotPasswordSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- change code company
+//-----------------------------------------------------------
+router.put('/code-company', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `change code company` }
+    try {
+        LOGGER.info(dataLogger);
+
+        //-- verify body
+        const v = new Validator(req.body,
+            { code: 'required' },
+        );
+        const matched = await v.check()
+        if (!matched) {
+            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+        }
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+        const account = await AccountsService.findAccount(uuid);
+        if (!account) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        const updated = await AccountsService.updateAccountById(account.accId, {
+            compCode: req.body?.code,
+            updatedBy: req?.authen.username,
+        });
+
+        RESPONSE.success(res, SESSION_ID, updated, messages.success.updateCodeSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- save disconnected chanel login
+//-----------------------------------------------------------
+router.post('/disconnect', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `save disconnected chanel login` }
+    try {
+        LOGGER.info(dataLogger);
+
+        //-- verify body
+        const v = new Validator(req.body,
+            { chanelId: 'required' },
+        );
+        const matched = await v.check()
+        if (!matched) {
+            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+        }
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+
+        const account = await AccountsService.findAccountByUuid(uuid);
+        if (!account) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        if (account?.chanelLogin && account?.chanelLogin.length <= 1) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.disconnectOneMore);
+        }
+
+        const id = Number(req.body?.chanelId);
+        const findChanel = account?.chanelLogin?.find((c) => c.id == id);
+        if (!findChanel) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        if (findChanel?.isLineLiff == true) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.disconnectLine);
+        }
+
+        const chanelLogins = account?.chanelLogin.filter((c) => c.id != id);
+        let isClearPassword = true;
+        if (chanelLogins && chanelLogins.length > 0) {
+            chanelLogins.forEach((e) => {
+                if (
+                    [ELoginPlatform.EMAIL, ELoginPlatform.PHONE].includes(e.loginPlatform)
+                ) {
+                    isClearPassword = false;
+                }
+            });
+        }
+
+        //-- disconnect chanel login
+        await AccountsService.disconnectChanelLogin(id);
+
+        //-- clear password
+        if (isClearPassword) {
+            await AccountsService.clearPasswordByID(
+                account.accId,
+                req.authen?.username,
+            );
+        }
+        data = { isClearPassword, chanelLogins };
+
+        RESPONSE.success(res, SESSION_ID, data, messages.success.disconnectSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- save connected chanel login
+//-----------------------------------------------------------
+router.post('/connect', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `save connected chanel login` }
+    try {
+
+        LOGGER.info(dataLogger);
+
+        //-- verify body
+        const v = new Validator(req.body,
+            {
+                loginData: 'required',
+                loginPlatform: 'required',
+            },
+        );
+        const matched = await v.check()
+        if (!matched) {
+            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+        }
+
+        if (!['EMAIL', 'PHONE', 'LINE'].includes(req.body.loginPlatform)) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.connectPlatform);
+        }
+
+        //-- find UUID
+        const uuid = req.authen?.uuid ?? 'NONE';
+
+        //-- check channel login
+        const account = await AccountsService.findAccountByUuid(uuid);
+        if (!account) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        //-- new password
+        if (req.body?.isNewPW == 'save' && req.body?.accPassword) {
+            await AccountsService.updateAccountById(account.accId, {
+                accPassword: req.body?.accPassword
+            });
+        }
+
+        //-- find Exist 
+        const accountExist = account?.chanelLogin.find(Exist => Exist.loginPlatform == req.body.loginPlatform);
+        if (accountExist) {
+            return RESPONSE.exceptionVadidate(res, SESSION_ID, 'บัญชี ' + req.body.loginPlatform + ' ของท่านถูกเชื่อมต่อแล้ว');
+        }
+
+        //-- save account
+        let isConnected = false;
+        const saveAccount = await AccountsService.connectLogin(uuid, req.body, account?.accFirstname);
+        if (saveAccount) {
+            isConnected = true;
+        }
+
+        RESPONSE.success(res, SESSION_ID, { isConnected, connect: saveAccount }, messages.success.connectSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- lock password
+//-----------------------------------------------------------
+router.patch('/lock-password', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `lock password` }
+    try {
+        LOGGER.info(dataLogger);
+        const hashText = SecretHelper.getText(
+            '$2a$10$xsYyf9pqUvLgPFoWrxBXAujq.fway8RhFNgFZHyahbHvOZ98D6Co6',
+        );
+        const hash = SecretHelper.bcryptHash(hashText);
+        data = { text: 'hello world', hash }
+
+        RESPONSE.success(res, SESSION_ID, data, 'lock password successful');
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+module.exports = router;

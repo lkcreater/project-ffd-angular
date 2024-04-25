@@ -1,0 +1,33 @@
+{
+	"info": {
+		"_postman_id": "3c97d38a-ff05-40fc-a872-55eedd5df8d5",
+		"name": "financial-freedom",
+		"description": "financial-freedom",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "healthcheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{protocol}}://{{url}}:{{port}}/App-HealthCheck",
+					"protocol": "{{protocol}}",
+					"host": [
+						"{{url}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"App-HealthCheck"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

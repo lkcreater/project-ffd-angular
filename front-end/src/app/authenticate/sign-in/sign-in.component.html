@@ -1,0 +1,107 @@
+<app-card-content [hiddenMenu]="true">
+  <div class="display">
+    <!-- begin title -->
+    <div class="title mb-7">เข้าสู่ระบบ</div>
+
+    <!-- begin form login -->
+    <form
+      nz-form
+      nzLayout="vertical"
+      [formGroup]="validateForm"
+      (ngSubmit)="submitLoginForm()"
+    >
+      <!-- username -->
+      <nz-form-item class="app-input-form">
+        <nz-form-label>อีเมล / เบอร์</nz-form-label>
+        <nz-form-control nzErrorTip="กรุณาใส่ หมายเลขโทรศัพท์ / อีเมล">
+          <input
+            nz-input
+            id="input-username-login"
+            type="text"
+            formControlName="userName"
+            placeholder="กรอกหมายเลขโทรศัพท์ / อีเมล"
+            class="w-full"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- password -->
+      <nz-form-item class="app-input-form">
+        <nz-form-label>รหัสผ่าน</nz-form-label>
+        <nz-form-control nzErrorTip="กรุณาใส่ รหัสผ่าน">
+          <nz-input-group [nzSuffix]="suffixTemplate">
+            <input
+              [type]="passwordVisible ? 'text' : 'password'"
+              nz-input
+              id="input-password-login"
+              placeholder="กรอกรหัสผ่าน"
+              formControlName="password"
+              class="text-placeholder w-full"
+            />
+          </nz-input-group>
+          <ng-template #suffixTemplate>
+            <span
+              nz-icon
+              class="cursor-pointer"
+              [nzType]="passwordVisible ? 'eye' : 'eye-invisible'"
+              (click)="passwordVisible = !passwordVisible"
+            ></span>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- forgot password -->
+      <div class="flex justify-end">
+        <a
+          id="btn-forrgotpassword-login"
+          class="app-text text-[var(--color-info)]"
+          [routerLink]="['/auth/forgot-password']"
+          >ลืมรหัสผ่าน</a
+        >
+      </div>
+
+      <!-- btn submit -->
+      <div class="mt-5">
+        <button
+          type="submit"
+          id="btn-signIn"
+          class="btn-app btn-primary w-full"
+          [disabled]="submitLoading"
+        >
+          <app-label-input-loading
+            label="เข้าสู่ระบบ"
+            [isLoading]="submitLoading"
+          />
+        </button>
+      </div>
+    </form>
+    <!-- end form login -->
+
+    <!-- begin or -->
+    <div class="my-12">
+      <nz-divider nzText="หรือ" ></nz-divider>
+    </div>
+    <!-- end or -->
+
+    <!-- begin LINE -->
+    <div class="mb-4">
+      @for (line of lineProvider; track $index) {
+        <div class="mt-3">
+          <app-btn-line-login
+            nz-row
+            [id]="'btn-line-login-' + $index"
+            [line]="line"
+          />
+        </div>
+      }
+    </div>
+    <!-- end LINE -->
+
+    <div class="text-center mt-12 mb-5">
+      <p class="app-text txt-primary">
+        หากยังไม่ลงทะเบียน 
+        <a class="text-[var(--color-info)]" href="javascript:void(0)" [routerLink]="['/auth/chanel']">คลิกที่นี่</a>
+      </p>
+    </div>
+  </div>
+</app-card-content>

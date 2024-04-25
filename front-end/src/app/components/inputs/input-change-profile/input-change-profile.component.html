@@ -1,0 +1,33 @@
+<form nz-form [formGroup]="validateForm">
+  <nz-form-item class="">
+    <nz-form-control nzErrorTip="กรุณากรอกข้อมูล">
+      <nz-input-group class="input-form" [nzSuffix]="suffixTemplate">
+        <input
+          type="text"
+          nz-input
+          [attr.id]="id"
+          [placeholder]="label + ' ' + input"
+          formControlName="fieldName"
+          class="text-placeholder"
+        />
+        <ng-template #suffixTemplate>
+          @if (isUpdate) {
+          <span
+            nz-icon
+            class="cursor-pointer"
+            nzType="save"
+            (click)="submitForm()"
+          ></span>
+          } @else {
+          <span
+            nz-icon
+            class="cursor-pointer"
+            (click)="btnAction()"
+            nzType="edit"
+          ></span>
+          }
+        </ng-template>
+      </nz-input-group>
+    </nz-form-control>
+  </nz-form-item>
+</form>

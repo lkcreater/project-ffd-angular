@@ -1,0 +1,20 @@
+<div class="flex justify-center">
+  <app-card-avatar [isUploaded]="false" [token]="token" (onUploaded)="onUploadAvatar($event)" />
+</div>
+
+<div class="title my-8">ตั้งชื่อ</div>
+
+<form nz-form nzLayout="vertical" [formGroup]="validateForm">
+  <nz-form-item class="app-input-form">
+    <nz-form-control [nzErrorTip]="'กรุณากรอกชื่อ'">
+      <input
+        nz-input
+        id="input-display-username"
+        type="text"
+        formControlName="userName"
+        placeholder="กรุณาใส่ชื่อของท่าน"
+        class="w-full"
+      />
+    </nz-form-control>
+  </nz-form-item>
+</form>

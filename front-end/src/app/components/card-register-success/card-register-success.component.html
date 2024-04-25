@@ -1,0 +1,22 @@
+<app-card-content >
+  <div class="display">
+    <div class="title mb-7">สวัสดี คุณ {{ account.accFirstname }}</div>
+    <p>มาเช็คสุขภาพการเงินของคุณ</p>
+    <div class="mt-28">
+        <img [src]="imageWelcome" alt="">
+    </div>
+  </div>
+
+  <div footer>
+    <div class="display-footer">
+      <button
+        id="btn-start-healthcheck"
+        type="button"
+        class="btn-app btn-primary w-full"
+        [routerLink]="['/health-check']" 
+      >
+        <span>เริ่มต้นค้นหาตัวตน</span>
+      </button>
+    </div>
+  </div>
+</app-card-content>

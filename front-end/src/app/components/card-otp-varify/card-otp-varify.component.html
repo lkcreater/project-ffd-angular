@@ -1,0 +1,47 @@
+<p class="text-otp-page">
+  รหัสยืนยันตัวตนจะถูกส่งไปทาง{{ label }}ที่ <br />
+  {{ displayInput() }}
+  @if(otpObjectRef.code) {
+    <br /> Ref: {{ otpObjectRef.code }}
+  }
+</p>
+
+<div>
+  <form nz-form [formGroup]="validateForm">
+    <div class="flex gap-2 mt-10">
+      @for (item of listOfControl; track $index) {
+      <nz-form-control class="app-input-form">
+        <nz-form-item>
+          <input
+            class="otp"
+            nz-input
+            #refInput
+            type="number"
+            maxlength="1"
+            (keyup)="onInputDel($event, $index)"
+            (input)="onInputKey($event, $index)"
+            [attr.id]="'input-otp-' + item.id"
+            [formControlName]="item.controlInstance"
+          />
+        </nz-form-item>
+      </nz-form-control>
+      }
+    </div>
+  </form>
+</div>
+
+<div class="text-center">
+  @if (!timeFinished) {
+  <p class="text-otp-page">
+    กรุณารอ {{ timeCountdown }} วินาทีก่อนกดส่งอีกครั้ง
+  </p>
+  } @else {
+  <a
+    href="javascript:void(0);"
+    id="btn-resend-otp"
+    class="a-link"
+    (click)="resendOtp()"
+    >ส่ง OTP อีกครั้ง</a
+  >
+  }
+</div>

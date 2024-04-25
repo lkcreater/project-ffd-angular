@@ -1,0 +1,18 @@
+@if (!hiddenHeader) {
+<!-- header content -->
+<app-header [hiddenMenu]="hiddenMenu"></app-header>
+}
+
+<div class="card-content">
+  <!-- body content -->
+  <div class="container mx-auto">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- footer content -->
+  <div class="footer">
+    <div class="container mx-auto">
+      <ng-content select="[footer]"></ng-content>
+    </div>
+  </div>
+</div>

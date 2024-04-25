@@ -1,0 +1,278 @@
+@font-face {
+  font-family: TISCOIconFont;
+  src: url(clientlib-all/fonts/tsciconfont-webfont.eot?v=4.4.0);
+  src: url(clientlib-all/fonts/tsciconfont-webfont.eot?#iefix&v=4.4.0)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tsciconfont-webfont.woff2?v=4.4.0) format("woff2"),
+    url(clientlib-all/fonts/tsciconfont-webfont.woff?v=4.4.0) format("woff"),
+    url(clientlib-all/fonts/tsciconfont-webfont.ttf?v=4.4.0) format("truetype"),
+    url(clientlib-all/fonts/tsciconfont-webfont.svg?v=4.4.0#fontawesomeregular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont1-regular;
+  src: url(clientlib-all/fonts/tscfont1-regular-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont1-regular-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont1-regular-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont1-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont1-regular-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont1-regular-webfont.svg#tscfont1_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont1-bold;
+  src: url(clientlib-all/fonts/tscfont1-bold-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont1-bold-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont1-bold-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont1-bold-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont1-bold-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont1-bold-webfont.svg#tscfont1_bold)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont1-italic;
+  src: url(clientlib-all/fonts/tscfont1-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont1-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont1-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont1-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont1-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont1-italic-webfont.svg#tscfont1_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont1-bold-italic;
+  src: url(clientlib-all/fonts/tscfont1-bold-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont1-bold-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont1-bold-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont1-bold-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont1-bold-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont1-bold-italic-webfont.svg#tscfont1_bold_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont2-regular;
+  src: url(clientlib-all/fonts/tscfont2-regular-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont2-regular-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont2-regular-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont2-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont2-regular-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont2-regular-webfont.svg#tscfont2_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont2-italic;
+  src: url(clientlib-all/fonts/tscfont2-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont2-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont2-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont2-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont2-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont2-italic-webfont.svg#tscfont2_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont2-bold;
+  src: url(clientlib-all/fonts/tscfont2-bold-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont2-bold-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont2-bold-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont2-bold-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont2-bold-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont2-bold-webfont.svg#tscfont2_bold)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont2-bold-italic;
+  src: url(clientlib-all/fonts/tscfont2-bold-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont2-bold-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont2-bold-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont2-bold-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont2-bold-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont2-bold-italic-webfont.svg#tscfont2_bold_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont3-regular;
+  src: url(clientlib-all/fonts/tscfont3-regular-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont3-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont3-regular-webfont.svg#tscfont3_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont3-italic;
+  src: url(clientlib-all/fonts/tscfont3-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont3-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont3-italic-webfont.svg#tscfont3_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont3-bold;
+  src: url(clientlib-all/fonts/tscfont3-bold-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont3-bold-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont3-bold-webfont.svg#tscfont3_bold)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont3-bold-italic;
+  src: url(clientlib-all/fonts/tscfont3-bold-italic-webfont.woff2)
+      format("woff2"),
+    url(clientlib-all/fonts/tscfont3-bold-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont3-bold-italic-webfont.svg#tscfont3_bold_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont4-regular;
+  src: url(clientlib-all/fonts/tscfont4-regular-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont4-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont4-regular-webfont.svg#tscfont4_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont4-italic;
+  src: url(clientlib-all/fonts/tscfont4-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont4-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont4-italic-webfont.svg#tscfont4_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont5-regular;
+  src: url(clientlib-all/fonts/tscfont5-regular-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont5-regular-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont5-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont5-regular-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont5-regular-webfont.otf) format("opentype"),
+    url(clientlib-all/fonts/tscfont5-regular-webfont.svg#tscfont5_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+}
+@font-face {
+  font-family: TISCOFont5-italic;
+  src: url(clientlib-all/fonts/tscfont5-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont5-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont5-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont5-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont5-italic-webfont.otf) format("opentype"),
+    url(clientlib-all/fonts/tscfont5-italic-webfont.svg#tscfont5_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: normal;
+}
+@font-face {
+  font-family: TISCOFont5-bold;
+  src: url(clientlib-all/fonts/tscfont5-bold-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont5-bold-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont5-bold-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont5-bold-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont5-bold-webfont.otf) format("opentype"),
+    url(clientlib-all/fonts/tscfont5-bold-webfont.svg#tscfont5_bold)
+      format("svg");
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+}
+@font-face {
+  font-family: TISCOFont6-regular;
+  src: url(clientlib-all/fonts/tscfont6-regular-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont6-regular-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont6-regular-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont6-regular-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont6-regular-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont6-regular-webfont.svg#tscfont6_regular)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont6-bold;
+  src: url(clientlib-all/fonts/tscfont6-bold-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont6-bold-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont6-bold-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont6-bold-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont6-bold-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont6-bold-webfont.svg#tscfont6_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont6-italic;
+  src: url(clientlib-all/fonts/tscfont6-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont6-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont6-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont6-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont6-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont6-italic-webfont.svg#tscfont6_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCOFont6-bold-italic;
+  src: url(clientlib-all/fonts/tscfont6-bold-italic-webfont.eot);
+  src: url(clientlib-all/fonts/tscfont6-bold-italic-webfont.eot?#iefix)
+      format("embedded-opentype"),
+    url(clientlib-all/fonts/tscfont6-bold-italic-webfont.woff2) format("woff2"),
+    url(clientlib-all/fonts/tscfont6-bold-italic-webfont.woff) format("woff"),
+    url(clientlib-all/fonts/tscfont6-bold-italic-webfont.ttf) format("truetype"),
+    url(clientlib-all/fonts/tscfont6-bold-italic-webfont.svg#tscfont6_bold_italic)
+      format("svg");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'TISCONewFont-regular';
+  src: url('https://www.tisco.co.th/etc/designs/tiscocore/clientlib-all/fonts/TISCO-Regular.ttf') format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: TISCONewFont-bold;
+  src: url(clientlib-all/fonts/TISCO-Bold.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}

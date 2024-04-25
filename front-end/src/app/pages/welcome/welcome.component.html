@@ -1,0 +1,11 @@
+@if (userInfo.isAuthenticated == false) {
+  <app-card-welcome />
+} 
+@else {
+  @if(userInfo.userInfo.peronaIcon == null) {
+    <app-card-register-success />
+  }
+  @else {
+    <app-home />
+  }
+}

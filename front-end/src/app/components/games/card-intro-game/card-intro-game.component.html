@@ -1,0 +1,30 @@
+<div class="w-full">
+  <img
+    src="assets/games/mock_banner.png"
+    class="rounded-[10px]"
+    alt="profile"
+    [style]="{ width: '380px', height: '280px' }"
+  />
+  <p class="text-[#263238] text-[16px] font-bold">
+    เกมที่เรียนรู้เรื่องของ การออมเงิน
+  </p>
+  <div class="my-1">
+    <span class="text-[#005DA5]">1</span
+    ><span class="text-[#908D8D]">/3 Challenge Completed</span>
+  </div>
+  @if(openDetail == true){
+  <p>
+    เป็นหนึ่งในสาเหตุหลักที่ทำให้ประสิทธิภาพ การทำงานลดลง
+    และถ้ายิ่งเครียดมากปัญหาต่างๆ ก็ตามมามาก งั้นเราลองมา เล่นเกมถูกผิด
+    เพื่อทดสอบว่าเราอยู่ในความเครียดระดับไหน ถ้าพร้อมแล้วเริ่มเลย...
+  </p>
+  }
+  <div class="flex gap-2 mt-2">
+    <div class="border border-[#D9D9D9] rounded-[10px] w-fit">
+      <p class="text-center p-2 text-[#908D8D]">ออม</p>
+    </div>
+    <div class="border border-[#D9D9D9] rounded-[10px] w-fit">
+      <p class="text-center p-2 text-[#908D8D]">เกมถูกผิด</p>
+    </div>
+  </div>
+</div>

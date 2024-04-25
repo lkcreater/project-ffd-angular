@@ -1,0 +1,965 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Tisco API"
+  description: "APIs for tisco"
+basePath: "/"
+paths:
+  /accounts:
+    get:
+      summary: "Get profile information"
+      description: "Retrieves profile information of the currently logged-in user."
+      responses:
+        200:
+          description: "Profile information retrieved successfully"
+    put:
+      summary: "Update account information"
+      description: "Updates the profile information of the currently logged-in user."
+      parameters:
+        - name: "accPicture"
+          in: "body"
+          description: "Account picture URL"
+          required: false
+          schema:
+            type: "string"
+        - name: "accFirstname"
+          in: "body"
+          description: "Account first name"
+          required: false
+          schema:
+            type: "string"
+        - name: "compCode"
+          in: "body"
+          description: "Company code"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Account information updated successfully"
+    post:
+      summary: "Save forgot password"
+      description: "Saves the new password for the currently logged-in user."
+      parameters:
+        - name: "accPassword"
+          in: "body"
+          description: "New account password"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Password updated successfully"
+    patch:
+      summary: "Lock password"
+      description: "Locks the password of the currently logged-in user."
+      responses:
+        200:
+          description: "Password locked successfully"
+  /accounts/update-profile:
+    put:
+      summary: "Update account information"
+      description: "Updates the profile information of the currently logged-in user."
+      parameters:
+        - name: "accPicture"
+          in: "body"
+          description: "Account picture URL"
+          required: false
+          schema:
+            type: "string"
+        - name: "accFirstname"
+          in: "body"
+          description: "Account first name"
+          required: false
+          schema:
+            type: "string"
+        - name: "compCode"
+          in: "body"
+          description: "Company code"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Account information updated successfully"
+  /accounts/forgot-pwd:
+    put:
+      summary: "Save forgot password"
+      description: "Saves the new password for the currently logged-in user."
+      parameters:
+        - name: "accPassword"
+          in: "body"
+          description: "New account password"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Password updated successfully"
+  /accounts/code-company:
+    put:
+      summary: "Change code company"
+      description: "Changes the company code associated with the currently logged-in user."
+      parameters:
+        - name: "code"
+          in: "body"
+          description: "New company code"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Company code changed successfully"
+  /accounts/disconnect:
+    post:
+      summary: "Save disconnected channel login"
+      description: "Saves the disconnected channel login information for the currently logged-in user."
+      parameters:
+        - name: "chanelId"
+          in: "body"
+          description: "Channel ID to disconnect"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        200:
+          description: "Channel login disconnected successfully"
+  /accounts/connect:
+    post:
+      summary: "Save connected channel login"
+      description: "Saves the connected channel login information for the currently logged-in user."
+      parameters:
+        - name: "loginData"
+          in: "body"
+          description: "Login data for the new channel"
+          required: true
+          schema:
+            type: "object"
+        - name: "loginPlatform"
+          in: "body"
+          description: "Login platform for the new channel"
+          required: true
+          schema:
+            type: "string"
+            enum: ["EMAIL", "PHONE", "LINE"]
+      responses:
+        200:
+          description: "Channel login connected successfully"
+      /authen:
+    post:
+      summary: "Login Email/Phone"
+      description: "Authenticate users via email or phone number."
+      parameters:
+        - name: "action"
+          in: "body"
+          description: "Action type (AUTHEN or AUTHEN_CONFIRM)"
+          required: true
+          schema:
+            type: "string"
+        - name: "userName"
+          in: "body"
+          description: "Email address or phone number"
+          required: true
+          schema:
+            type: "string"
+        - name: "passWord"
+          in: "body"
+          description: "User password"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Login successful"
+  /authen/authen-confirm:
+    post:
+      summary: "Confirm Email/Phone"
+      description: "Confirm authentication via email or phone number."
+      parameters:
+        - name: "action"
+          in: "body"
+          description: "Action type (AUTHEN_CONFIRM)"
+          required: true
+          schema:
+            type: "string"
+        - name: "userName"
+          in: "body"
+          description: "Email address or phone number"
+          required: true
+          schema:
+            type: "string"
+        - name: "passWord"
+          in: "body"
+          description: "User password"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Authentication confirmed"
+  /authen/create-account:
+    post:
+      summary: "Create Account"
+      description: "Create a new user account via email or phone number."
+      parameters:
+        - name: "action"
+          in: "body"
+          description: "Action type (CREATE_ACCOUNT)"
+          required: true
+          schema:
+            type: "string"
+        - name: "userName"
+          in: "body"
+          description: "Email address or phone number"
+          required: true
+          schema:
+            type: "string"
+        - name: "passWord"
+          in: "body"
+          description: "User password"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        200:
+          description: "Account created successfully"
+  /authen/line:
+    post:
+      summary: "Login via LINE"
+      description: "Authenticate users via LINE messaging platform."
+      parameters:
+        - name: "action"
+          in: "body"
+          description: "Action type (AUTHEN_LINE)"
+          required: true
+          schema:
+            type: "string"
+        - name: "loginData"
+          in: "body"
+          description: "LINE login data"
+          required: true
+          schema:
+            type: "object"
+      responses:
+        200:
+          description: "Login via LINE successful"
+  /authen/test:
+    get:
+      summary: "Test Endpoint"
+      description: "Test endpoint for verifying functionality."
+      responses:
+        200:
+          description: "Test successful"
+  /consent/version:
+    post:
+      summary: Check version of consent
+      operationId: checkConsentVersion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authen:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAcceptConsent:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /consent/get-consent:
+    get:
+      summary: Get consent
+      operationId: getConsent
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consent:
+                    type: object
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /consent/save-consent:
+    post:
+      summary: Save consent
+      operationId: saveConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authen:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                option:
+                  type: integer
+                # Add other properties as needed
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  save:
+                    type: boolean
+                  saveMember:
+                    type: object
+                  verifyMember:
+                    type: object
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        /content:
+    get:
+      summary: Get content
+      operationId: getContent
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string                
+    /content:
+    get:
+      summary: Get content
+      operationId: getContent
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    /health-check:
+    get:
+      summary: Get all questions and answers
+      operationId: getAllHealthCheck
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    question:
+                      type: string
+                    answers:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          answer:
+                            type: string
+                          ansScore:
+                            type: integer
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      summary: Create health check question
+      operationId: createHealthCheckQuestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+              required:
+                - question
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  question:
+                    type: string
+                  createdAt:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /health-check/create-answer:
+    post:
+      summary: Create health check answer
+      operationId: createHealthCheckAnswer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                answer:
+                  type: string
+                ansScore:
+                  type: integer
+              required:
+                - answer
+                - ansScore
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                  ansScore:
+                    type: integer
+                  createdAt:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /health-check/save-answer:
+    post:
+      summary: Save health check answer
+      operationId: saveHealthCheckAnswer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hcHisSystem:
+                  type: string
+                hcHisAnswer:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      question:
+                        type: string
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            answer:
+                              type: string
+                            ansScore:
+                              type: integer
+                  required:
+                    - question
+                    - answers
+              required:
+                - hcHisSystem
+                - hcHisAnswer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  save:
+                    type: boolean
+                  peronaIcon:
+                    type: object
+                    properties:
+                      iconId:
+                        type: integer
+                      createdAt:
+                        type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /health-check/persona-icon:
+    post:
+      summary: Create persona icon
+      operationId: createPersonaIcon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iconLevel:
+                  type: string
+                iconName:
+                  type: string
+                iconImage:
+                  type: string
+                iconDetail:
+                  type: string
+                iconMinScore:
+                  type: integer
+                iconMaxScore:
+                  type: integer
+              required:
+                - iconLevel
+                - iconName
+                - iconImage
+                - iconDetail
+                - iconMinScore
+                - iconMaxScore
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iconId:
+                    type: integer
+                  createdAt:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /health-check/perona-icon:
+    get:
+      summary: Get all persona icon
+      operationId: getAllPersonaIcon
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    iconId:
+                      type: integer
+                    iconLevel:
+                      type: string
+                    iconName:
+                      type: string
+                    iconImage:
+                      type: string
+                    iconDetail:
+                      type: string
+                    iconMinScore:
+                      type: integer
+                    iconMaxScore:
+                      type: integer
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    /history-password:
+    post:
+      summary: Get history password
+      operationId: getHistoryPassword
+      requestBody:
+        required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    history:
+                      type: string
+                    createdAt:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    /line-chanel:
+    get:
+      summary: Get all Line channels
+      operationId: getAllLineChannels
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lineChanel:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        createdAt:
+                          type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    /refresh-token/verify-input:
+    post:
+      summary: Verify email/phone existence
+      operationId: verifyInput
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [VERIFY, AUTHEN_WEB]
+                input:
+                  type: string
+              required:
+                - action
+                - input
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  isExistAlready:
+                    type: boolean
+                  type:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /refresh-token/sent-otp:
+    post:
+      summary: Send OTP
+      operationId: sendOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [OTP]
+                input:
+                  type: string
+              required:
+                - action
+                - input
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  secret:
+                    type: string
+                  type:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /refresh-token/verify-otp:
+    post:
+      summary: Verify OTP
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                secret:
+                  type: string
+              required:
+                - otp
+                - secret
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                  response_code:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string       
+    /term-and-condition:
+    get:
+      summary: Get term and condition
+      operationId: getTermAndCondition
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  term:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      summary: Action term and condition
+      operationId: actionTermAndCondition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                option:
+                  type: integer
+              required:
+                - option
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  saveCondition:
+                    type: boolean
+                  token:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    /upload-file/base64:
+    post:
+      summary: Upload file from base64 data
+      operationId: uploadFileBase64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+              required:
+                - file
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  test:
+                    type: object
+  /upload-file:
+    post:
+      summary: Upload file
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  file:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string                                                                                 

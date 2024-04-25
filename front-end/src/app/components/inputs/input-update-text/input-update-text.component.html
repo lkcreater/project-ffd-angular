@@ -1,0 +1,29 @@
+<div class="box-input-update-text">
+  @if (!isEditable) {
+  <div class="input-update-text flex justify-between">
+    @if(input) {
+      <span class="label">{{ input }}</span>
+    }
+    @else {
+      <i>{{ label }}</i>
+    }
+    <button class="btn" type="button" (click)="isEditable = !isEditable">
+      <span nz-icon class="cursor-pointer" nzType="edit"></span>
+    </button>
+  </div>
+  } @else {
+  <div class="app-input-form !mb-0">
+    <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
+      <input type="text" nz-input [(ngModel)]="input" [placeholder]="'กรุณากรอก '+ label" />
+    </nz-input-group>
+    <ng-template #suffixIconButton>
+      <button class="btn btn-save" type="button" (click)="saveUpdate()">
+        <span nz-icon nzType="check"></span>
+      </button>
+      <button class="btn btn-cancel" type="button" (click)="isEditable = !isEditable">
+        <span nz-icon nzType="close"></span>
+      </button>
+    </ng-template>
+  </div>
+  }
+</div>

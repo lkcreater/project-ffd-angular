@@ -1,0 +1,30 @@
+#ng-pages-layout {
+}
+.ng-page-error {
+  .ant-result-icon {
+    svg {
+      margin: auto;
+    }
+  }
+}
+
+.modal-count {
+  .ant-modal-content {
+    background-color: transparent;
+    box-shadow: none;
+    .anticon,
+    .ant-modal-confirm-title{
+      display: none;
+    }
+    .ant-btn {
+      display: none;
+    }
+    .ant-modal-confirm-content{
+      .ng-star-inserted{
+        font-size: 160px;
+        color: #00ff29;
+        text-shadow: 1px 3px 10px #000000af;
+      }
+    }
+  }
+}

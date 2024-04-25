@@ -1,0 +1,44 @@
+@if (isFinish) {
+<app-card-health-check-confirm />
+} @else {
+<app-card-content [hiddenMenu]="true">
+  <div class="card-health-check px-2">
+    <div class="fix-m-dispaly mx-auto">
+      <app-progress-bar [progress]="progress" />
+    </div>
+
+    <div class="question">
+      @for (question of questionInitail; track $index) {
+      <app-card-health-check-question
+        (onChange)="getChooseChoice($event, $index)"
+        [question]="question"
+        [class]="{
+          hidden: $index != index
+        }"
+      />
+      }
+    </div>
+  </div>
+
+  <div footer class="flex justify-center gap-2 pb-8 bg-white">
+    @if (index > 0) {
+    <button
+      type="button"
+      id="btn-question-prev"
+      class="btn-app btn-gray w-full lg:w-2/12"
+      (click)="btnPrevStep()"
+    >
+      ย้อนกลับ
+    </button>
+    }
+    <button
+      type="button"
+      id="btn-question-next"
+      class="btn-app btn-primary w-full lg:w-2/12"
+      (click)="btnNextStep()"
+    >
+      ถัดไป
+    </button>
+  </div>
+</app-card-content>
+}

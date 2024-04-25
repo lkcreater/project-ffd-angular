@@ -1,0 +1,9 @@
+@if (isLoading) {
+<div class="h-screen flex items-center justify-center">
+  <app-loading [animated]="true"></app-loading>
+</div>
+} 
+@else {
+<router-outlet></router-outlet>
+}
+

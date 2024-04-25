@@ -1,0 +1,135 @@
+<app-card-content>
+  <div class="display">
+    <!-- card information -->
+    <div class="card-info-profile">
+      <!-- image avatar -->
+      <div class="flex flex-col">
+        <app-card-avatar
+          class="flex justify-center"
+          [avatar]="avatar"
+          [isUploaded]="true"
+          [token]="token"
+        />
+
+        <div class="flex justify-center my-5">
+          <div class="flex text-center justify-center mx-2"> 
+            @if(lineChannel && lineChannel.loginVerify == 1) {
+              <div class="verify-member active mt-2"></div> Verified Member 
+            }
+            @else {
+              <div class="verify-member mt-2"></div> Unverified Member 
+            }
+          </div>
+          @if(lineChannel) {
+            <button
+              type="button"
+              nz-popconfirm
+              nzPopconfirmTitle="คุณต้องการ re-consent บัญชีนี้ใช่หรือไม่"
+              nzOkText="ยืนยัน"
+              nzCancelText="ยกเลิก"
+              (nzOnConfirm)="actionReconsent()"
+            >
+              <span nz-icon nzType="sync" nzTheme="outline"></span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <app-input-update-text
+          label="Display Name"
+          inputName="accFirstname"
+          [input]="userInfoData.userInfo.accFirstname"
+          (onChange)="onUpdateProfile($event)"
+        />
+      </div>
+
+      <div class="mt-4">
+        <app-input-update-text
+          label="Company ID"
+          inputName="compCode"
+          [input]="userInfoData.userInfo.compCode"
+          (onChange)="onUpdateProfile($event)"
+        />
+      </div>
+
+      <div class="mt-4">
+        <div class="box-input-update-text" [class.disable]="!isChangePassword">
+          <div class="input-update-text flex justify-between">
+            <i>Change Password</i>
+            <button
+              class="btn"
+              [disabled]="!isChangePassword"
+              type="button"
+              (click)="actionChangePassord()"
+            >
+              <span nz-icon class="cursor-pointer" nzType="edit"></span>
+            </button>
+          </div>
+          @if (!isChangePassword) {
+          <span class="text-warning"
+            >ไม่สามารถเปลี่ยนรหัสผ่านได้
+            เนื่องจากท่านไม่ได้ผูกบัญชีอีเมลหรือเบอร์โทรศัพท์ไว้</span
+          >
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- card connect account -->
+    <div class="card-info-profile mt-7">
+      <span class="label">Connect Account</span>
+
+      @for (login of connectAccount; track $index) {
+      <div class="mt-2">
+        <app-input-connect-account
+          [type]="login.type"
+          [data]="login"
+          (onAction)="onAction($event)"
+        />
+      </div>
+      }
+    </div>
+  </div>
+</app-card-content>
+
+<nz-modal
+  [(nzVisible)]="visibleModal"
+  nzTitle="เลือกบัญชีที่ต้องการยืนยันตัวตน"
+  [nzFooter]="null"
+  (nzOnCancel)="modalHandleCancel()"
+>
+  <ng-container *nzModalContent>
+    <div class="box-choose-account">
+      @for (item of listAccount; track $index) {
+      <div class="box mb-4">
+        <div class="flex flex-row">
+          @if(item.type == 'EMAIL') {
+          <img
+            class="h-[18px] mr-[15px] mt-[7px]"
+            src="./assets/icons/icon-email.svg"
+            alt=""
+          />
+          } @if(item.type == 'PHONE') {
+          <img
+            class="h-[23px] mr-[20px] mt-[2px]"
+            src="./assets/icons/icon-phone.svg"
+            alt=""
+          />
+          }
+          <span>{{ item.text }}</span>
+        </div>
+        <div class="extra">
+          <button
+            type="button"
+            class="btn-app btn-small btn-primary"
+            (click)="actionChooseAccount(item)"
+          >
+            เลือก
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </ng-container>
+</nz-modal>

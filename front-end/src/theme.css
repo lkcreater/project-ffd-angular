@@ -1,0 +1,21 @@
+
+/*  
+//  Custom Theming for NG-ZORRO
+//---------------------------------------------------------------
+//  setup older
+//  @import "../node_modules/ng-zorro-antd/ng-zorro-antd.less"; -> .../ng-zorro-antd.less";
+//---------------------------------------------------------------
+//  ## file angular.json
+//  "styles": [
+//      "src/theme.less", -> "src/theme.css"
+//      "src/styles.scss"
+//  ],
+*/
+@import "../node_modules/ng-zorro-antd/ng-zorro-antd.css";
+
+
+/* 
+// Override less variables to here
+// View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
+// @primary-color: #1890ff; 
+*/
