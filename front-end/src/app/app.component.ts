@@ -25,7 +25,7 @@ import { LoadingComponent } from './components/loading/loading.component';
     NzIconModule,
     NzLayoutModule,
     NzMenuModule,
-    LoadingComponent
+    LoadingComponent,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
@@ -44,16 +44,13 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      console.log('>>> start');
-
       Promise.all([
         this.setLoadUploadConfig(),
-        this.setActionLineChanel(), 
-        this.setActionTermCondition(), 
-        this.setUserDataUserInfo()
+        this.setActionLineChanel(),
+        this.setActionTermCondition(),
+        this.setUserDataUserInfo(),
       ]).then((values) => {
         this.isLoading = false;
-        console.log('>>> end', values);
       });
     }
   }
@@ -73,14 +70,15 @@ export class AppComponent implements OnInit {
   }
 
   async setActionTermCondition() {
-    const data = await firstValueFrom(this.termConditionService.fetchTermCondition());
+    const data = await firstValueFrom(
+      this.termConditionService.fetchTermCondition()
+    );
     this.store.dispatch(actionLoadTermCondition({ data: data ?? null }));
     return data;
   }
 
   async setUserDataUserInfo() {
     const data = await firstValueFrom(this.userInfoService.fetchUserInfo());
-    console.log('get me --> ', data);
     return data;
   }
 }

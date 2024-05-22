@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  tisco-ffd-web:
+    build: ./front-end
+    container_name: tisco-ffd-web
+    ports:
+      - "4200:4000"
+  tisco-ffd-api:
+    build: ./back-end
+    container_name: tisco-ffd-api
+    ports:
+      - "3000:3000"
+  
+  nginx:
+    image: nginx:stable-perl
+    expose:
+      - 80
+    ports:
+      - 80:80
+    volumes:
+      - ./deployment/nginx_dev.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - tisco-ffd-web
+      - tisco-ffd-api
+
+# networks:
+#   ffd_network_app:
+#     driver: bridge
+#     ipam:
+#       config:
+#         - subnet: 192.168.1.0/24
+#           gateway: 192.168.1.1

@@ -7,12 +7,7 @@ class SecretHelper {
   }
 
   static getText(hash) {
-    const keyB = SecretHelper.getPrivateKey();
-    return `${hash}${keyB}`;
-  }
-
-  static getPrivateKey() {
-    return '@true';
+    return `${hash}`;
   }
 
   static bcryptHash(key) {

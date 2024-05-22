@@ -30,6 +30,8 @@ import { CookieService } from 'ngx-cookie-service';
 export class HeaderComponent {
   
   @Input() hiddenMenu: boolean = false;
+  @Input() marginBottom: boolean = true;
+  @Input() hiddenHeaderScore: boolean = false;
 
   isCollapsed = false;
   stateShow = false;

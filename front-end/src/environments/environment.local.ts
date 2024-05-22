@@ -3,4 +3,5 @@ export const environment = {
   production: false,
   hostApi: 'http://localhost:3000',
   hostName: 'http://localhost:4200',
+  isDemo: true,
 };

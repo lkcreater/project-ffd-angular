@@ -1,35 +1,209 @@
-swagger: "2.0"
+openapi: 3.0.3
 info:
-  version: "1.0.0"
-  title: "Tisco API"
-  description: "APIs for tisco"
-basePath: "/"
+  title: APIs tisco - OpenAPI 3.0
+  description: APIs for tisco
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+  - url: http://159.138.242.188:3000/api/v1
+tags:
+  - name: account
+    description: Everything about your Account
+  - name: authen
+    description: Everything about your Authen
+  - name: consent
+    description: Everything about your Consent
+  - name: content
+    description: Everything about your Content
+  - name: health-check
+    description: Everything about your Health check
+  - name: require
+    description: Everything about your Require
+  - name: term
+    description: Everything about your Term
+  - name: game-board
+    description: Everything about your Game Board
+components:
+  securitySchemes:
+    beareAuth:
+        type: http
+        scheme: bearer
+        name: Authorization
+        in: header
+        bearerFormat: JWT
+        description: >-
+          Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345"
+  responses: 
+    UnauthorizedError:
+      description: Access token is missing or invalid
+  schemas:
+    Account:
+      type: object
+      properties:
+        hasPassword:
+          type: boolean
+        accId:
+          type: integer
+        uuidAccount:
+          type: string
+        compCode:
+          type: string
+        condiVersion:
+          type: string
+        condiAccept:
+          type: integer
+        accPicture:
+          type: string
+          nullable: true
+        accFirstname:
+          type: string
+        accLastname:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        createdDatetime:
+          type: string
+          format: date-time
+        updatedDatetime:
+          type: string
+          format: date-time
+        chanelLogin:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              uuidAccount:
+                type: string
+              loginPlatform:
+                type: string
+              loginData:
+                type: string
+              loginVerify:
+                type: integer
+              loginSecret:
+                type: string
+                nullable: true
+              lineClientId:
+                type: string
+                nullable: true
+              targetConsentCode:
+                type: string
+                nullable: true
+              targetConsentVersion:
+                type: string
+                nullable: true
+              acceptStatus:
+                type: integer
+              status:
+                type: string
+              isDefault:
+                type: boolean
+              isLineLiff:
+                type: boolean
+              active:
+                type: boolean
+              lastLogin:
+                type: string
+                format: date-time
+              createdBy:
+                type: string
+              updatedBy:
+                type: string
+              createdDatetime:
+                type: string
+                format: date-time
+              updatedDatetime:
+                type: string
+                format: date-time
+        peronaIcon:
+          type: object
+          properties:
+            iconId:
+              type: integer
+            iconLevel:
+              type: integer
+            iconName:
+              type: string
+            iconImage:
+              type: object
+              properties:
+                size:
+                  type: integer
+                type:
+                  type: string
+                object:
+                  type: string
+                fileUrl:
+                  type: string
+                newName:
+                  type: string
+                originalName:
+                  type: string
+            iconDetail:
+              type: string
+            iconMinScore:
+              type: integer
+            iconMaxScore:
+              type: integer
+            active:
+              type: boolean
+            createdBy:
+              type: string
+            updatedBy:
+              type: string
+            createdDatetime:
+              type: string
+              format: date-time
+            updatedDatetime:
+              type: string
+              format: date-time
+
 paths:
   /accounts:
     get:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Get profile information"
       description: "Retrieves profile information of the currently logged-in user."
       responses:
-        200:
+        '200':
           description: "Profile information retrieved successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Account'
+  /accounts/update-profile:
     put:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Update account information"
       description: "Updates the profile information of the currently logged-in user."
       parameters:
         - name: "accPicture"
-          in: "body"
           description: "Account picture URL"
           required: false
           schema:
             type: "string"
         - name: "accFirstname"
-          in: "body"
           description: "Account first name"
           required: false
           schema:
             type: "string"
         - name: "compCode"
-          in: "body"
           description: "Company code"
           required: false
           schema:
@@ -37,58 +211,27 @@ paths:
       responses:
         200:
           description: "Account information updated successfully"
-    post:
-      summary: "Save forgot password"
-      description: "Saves the new password for the currently logged-in user."
-      parameters:
-        - name: "accPassword"
-          in: "body"
-          description: "New account password"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        200:
-          description: "Password updated successfully"
+  /accounts/lock-password:
     patch:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Lock password"
       description: "Locks the password of the currently logged-in user."
       responses:
         200:
           description: "Password locked successfully"
-  /accounts/update-profile:
-    put:
-      summary: "Update account information"
-      description: "Updates the profile information of the currently logged-in user."
-      parameters:
-        - name: "accPicture"
-          in: "body"
-          description: "Account picture URL"
-          required: false
-          schema:
-            type: "string"
-        - name: "accFirstname"
-          in: "body"
-          description: "Account first name"
-          required: false
-          schema:
-            type: "string"
-        - name: "compCode"
-          in: "body"
-          description: "Company code"
-          required: false
-          schema:
-            type: "string"
-      responses:
-        200:
-          description: "Account information updated successfully"
   /accounts/forgot-pwd:
     put:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Save forgot password"
       description: "Saves the new password for the currently logged-in user."
       parameters:
         - name: "accPassword"
-          in: "body"
           description: "New account password"
           required: true
           schema:
@@ -98,11 +241,14 @@ paths:
           description: "Password updated successfully"
   /accounts/code-company:
     put:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Change code company"
       description: "Changes the company code associated with the currently logged-in user."
       parameters:
         - name: "code"
-          in: "body"
           description: "New company code"
           required: true
           schema:
@@ -112,11 +258,14 @@ paths:
           description: "Company code changed successfully"
   /accounts/disconnect:
     post:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Save disconnected channel login"
       description: "Saves the disconnected channel login information for the currently logged-in user."
       parameters:
         - name: "chanelId"
-          in: "body"
           description: "Channel ID to disconnect"
           required: true
           schema:
@@ -126,17 +275,19 @@ paths:
           description: "Channel login disconnected successfully"
   /accounts/connect:
     post:
+      tags:
+        - account
+      security:
+        - beareAuth: []
       summary: "Save connected channel login"
       description: "Saves the connected channel login information for the currently logged-in user."
       parameters:
         - name: "loginData"
-          in: "body"
           description: "Login data for the new channel"
           required: true
           schema:
             type: "object"
         - name: "loginPlatform"
-          in: "body"
           description: "Login platform for the new channel"
           required: true
           schema:
@@ -145,25 +296,24 @@ paths:
       responses:
         200:
           description: "Channel login connected successfully"
-      /authen:
+  /authen:
     post:
+      tags:
+        - authen
       summary: "Login Email/Phone"
       description: "Authenticate users via email or phone number."
       parameters:
         - name: "action"
-          in: "body"
           description: "Action type (AUTHEN or AUTHEN_CONFIRM)"
           required: true
           schema:
             type: "string"
         - name: "userName"
-          in: "body"
           description: "Email address or phone number"
           required: true
           schema:
             type: "string"
         - name: "passWord"
-          in: "body"
           description: "User password"
           required: true
           schema:
@@ -173,23 +323,22 @@ paths:
           description: "Login successful"
   /authen/authen-confirm:
     post:
+      tags:
+        - authen
       summary: "Confirm Email/Phone"
       description: "Confirm authentication via email or phone number."
       parameters:
         - name: "action"
-          in: "body"
           description: "Action type (AUTHEN_CONFIRM)"
           required: true
           schema:
             type: "string"
         - name: "userName"
-          in: "body"
           description: "Email address or phone number"
           required: true
           schema:
             type: "string"
         - name: "passWord"
-          in: "body"
           description: "User password"
           required: true
           schema:
@@ -199,23 +348,22 @@ paths:
           description: "Authentication confirmed"
   /authen/create-account:
     post:
+      tags:
+        - authen
       summary: "Create Account"
       description: "Create a new user account via email or phone number."
       parameters:
         - name: "action"
-          in: "body"
           description: "Action type (CREATE_ACCOUNT)"
           required: true
           schema:
             type: "string"
         - name: "userName"
-          in: "body"
           description: "Email address or phone number"
           required: true
           schema:
             type: "string"
         - name: "passWord"
-          in: "body"
           description: "User password"
           required: true
           schema:
@@ -225,17 +373,17 @@ paths:
           description: "Account created successfully"
   /authen/line:
     post:
+      tags:
+        - authen
       summary: "Login via LINE"
       description: "Authenticate users via LINE messaging platform."
       parameters:
         - name: "action"
-          in: "body"
           description: "Action type (AUTHEN_LINE)"
           required: true
           schema:
             type: "string"
         - name: "loginData"
-          in: "body"
           description: "LINE login data"
           required: true
           schema:
@@ -245,6 +393,8 @@ paths:
           description: "Login via LINE successful"
   /authen/test:
     get:
+      tags:
+        - authen
       summary: "Test Endpoint"
       description: "Test endpoint for verifying functionality."
       responses:
@@ -252,20 +402,12 @@ paths:
           description: "Test successful"
   /consent/version:
     post:
+      tags:
+        - consent
+      security:
+        - beareAuth: []
       summary: Check version of consent
       operationId: checkConsentVersion
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                authen:
-                  type: object
-                  properties:
-                    uuid:
-                      type: string
       responses:
         '200':
           description: OK
@@ -289,6 +431,10 @@ paths:
                     type: string
   /consent/get-consent:
     get:
+      tags:
+        - consent
+      security:
+        - beareAuth: []
       summary: Get consent
       operationId: getConsent
       responses:
@@ -312,6 +458,10 @@ paths:
                     type: string
   /consent/save-consent:
     post:
+      tags:
+        - consent
+      security:
+        - beareAuth: []
       summary: Save consent
       operationId: saveConsent
       requestBody:
@@ -352,8 +502,10 @@ paths:
                 properties:
                   message:
                     type: string
-        /content:
+  /content:
     get:
+      tags:
+        - content
       summary: Get content
       operationId: getContent
       responses:
@@ -374,32 +526,13 @@ paths:
                 type: object
                 properties:
                   message:
-                    type: string                
-    /content:
+                    type: string   
+  /health-check:
     get:
-      summary: Get content
-      operationId: getContent
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  content:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    /health-check:
-    get:
+      tags:
+        - health-check
+      security:
+        - beareAuth: []
       summary: Get all questions and answers
       operationId: getAllHealthCheck
       responses:
@@ -432,84 +565,96 @@ paths:
                 properties:
                   message:
                     type: string
-    post:
-      summary: Create health check question
-      operationId: createHealthCheckQuestion
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                question:
-                  type: string
-              required:
-                - question
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  question:
-                    type: string
-                  createdAt:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /health-check/create-answer:
-    post:
-      summary: Create health check answer
-      operationId: createHealthCheckAnswer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                answer:
-                  type: string
-                ansScore:
-                  type: integer
-              required:
-                - answer
-                - ansScore
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  answer:
-                    type: string
-                  ansScore:
-                    type: integer
-                  createdAt:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+    # post:
+    #   tags:
+    #     - health-check
+    #   security:
+    #     - beareAuth: []
+    #   summary: Create health check question
+    #   operationId: createHealthCheckQuestion
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             question:
+    #               type: string
+    #           required:
+    #             - question
+    #   responses:
+    #     '200':
+    #       description: OK
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: object
+    #             properties:
+    #               question:
+    #                 type: string
+    #               createdAt:
+    #                 type: string
+    #     '400':
+    #       description: Bad Request
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: object
+    #             properties:
+    #               message:
+    #                 type: string
+  # /health-check/create-answer:
+  #   post:
+  #     tags:
+  #       - health-check
+  #     security:
+  #       - beareAuth: []
+  #     summary: Create health check answer
+  #     operationId: createHealthCheckAnswer
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               answer:
+  #                 type: string
+  #               ansScore:
+  #                 type: integer
+  #             required:
+  #               - answer
+  #               - ansScore
+  #     responses:
+  #       '200':
+  #         description: OK
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 answer:
+  #                   type: string
+  #                 ansScore:
+  #                   type: integer
+  #                 createdAt:
+  #                   type: string
+  #       '400':
+  #         description: Bad Request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 message:
+  #                   type: string
   /health-check/save-answer:
     post:
+      tags:
+        - health-check
+      security:
+        - beareAuth: []
       summary: Save health check answer
       operationId: saveHealthCheckAnswer
       requestBody:
@@ -520,7 +665,7 @@ paths:
               type: object
               properties:
                 hcHisSystem:
-                  type: string
+                  type: object
                 hcHisAnswer:
                   type: array
                   items:
@@ -537,12 +682,21 @@ paths:
                               type: string
                             ansScore:
                               type: integer
-                  required:
+                    required:
                     - question
                     - answers
+                hcTypeRule:
+                  type: string
+                hcScoreInitil:
+                  type: number
+                hcHisScore:
+                  type: number
               required:
                 - hcHisSystem
                 - hcHisAnswer
+                - hcTypeRule
+                - hcScoreInitil
+                - hcHisScore
       responses:
         '200':
           description: OK
@@ -569,201 +723,12 @@ paths:
                 properties:
                   message:
                     type: string
-  /health-check/persona-icon:
+  /require/sent-otp:
     post:
-      summary: Create persona icon
-      operationId: createPersonaIcon
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                iconLevel:
-                  type: string
-                iconName:
-                  type: string
-                iconImage:
-                  type: string
-                iconDetail:
-                  type: string
-                iconMinScore:
-                  type: integer
-                iconMaxScore:
-                  type: integer
-              required:
-                - iconLevel
-                - iconName
-                - iconImage
-                - iconDetail
-                - iconMinScore
-                - iconMaxScore
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  iconId:
-                    type: integer
-                  createdAt:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /health-check/perona-icon:
-    get:
-      summary: Get all persona icon
-      operationId: getAllPersonaIcon
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    iconId:
-                      type: integer
-                    iconLevel:
-                      type: string
-                    iconName:
-                      type: string
-                    iconImage:
-                      type: string
-                    iconDetail:
-                      type: string
-                    iconMinScore:
-                      type: integer
-                    iconMaxScore:
-                      type: integer
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    /history-password:
-    post:
-      summary: Get history password
-      operationId: getHistoryPassword
-      requestBody:
-        required: false
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    history:
-                      type: string
-                    createdAt:
-                      type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    /line-chanel:
-    get:
-      summary: Get all Line channels
-      operationId: getAllLineChannels
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  lineChanel:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                        name:
-                          type: string
-                        description:
-                          type: string
-                        createdAt:
-                          type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    /refresh-token/verify-input:
-    post:
-      summary: Verify email/phone existence
-      operationId: verifyInput
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                action:
-                  type: string
-                  enum: [VERIFY, AUTHEN_WEB]
-                input:
-                  type: string
-              required:
-                - action
-                - input
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                  isExistAlready:
-                    type: boolean
-                  type:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-  /refresh-token/sent-otp:
-    post:
+      tags:
+        - require
+      security:
+        - beareAuth: []
       summary: Send OTP
       operationId: sendOtp
       requestBody:
@@ -804,8 +769,12 @@ paths:
                 properties:
                   message:
                     type: string
-  /refresh-token/verify-otp:
+  /require/verify-otp:
     post:
+      tags:
+        - require
+      security:
+        - beareAuth: []
       summary: Verify OTP
       operationId: verifyOtp
       requestBody:
@@ -844,9 +813,11 @@ paths:
                 type: object
                 properties:
                   message:
-                    type: string       
-    /term-and-condition:
+                    type: string   
+  /term:
     get:
+      tags:
+        - term
       summary: Get term and condition
       operationId: getTermAndCondition
       responses:
@@ -868,9 +839,66 @@ paths:
                 properties:
                   message:
                     type: string
+  /game/categories:
+    get:
+      tags:
+        - game-board
+      security:
+        - beareAuth: []
+      summary: Get categories
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+  /game/board-by-cate:
+    get:
+      tags:
+        - game-board
+      security:
+        - beareAuth: []
+      summary: Get board game by categories
+      parameters:
+        - in: path
+          name: ids
+          description: Comma-separated list of category IDs
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /game/board/{id}:
+    get:
+      tags:
+        - game-board
+      security:
+        - beareAuth: []
+      summary: Get game board
+      parameters:
+        - in: path
+          name: id
+          description: ID of the game board
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+  /game/save-answer:
     post:
-      summary: Action term and condition
-      operationId: actionTermAndCondition
+      tags:
+        - game-board
+      security:
+        - beareAuth: []
+      summary: Save game board answer
+      operationId: createHistory
       requestBody:
         required: true
         content:
@@ -878,82 +906,42 @@ paths:
             schema:
               type: object
               properties:
-                option:
-                  type: integer
-              required:
-                - option
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  saveCondition:
-                    type: boolean
-                  token:
-                    type: string
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-    /upload-file/base64:
-    post:
-      summary: Upload file from base64 data
-      operationId: uploadFileBase64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-              required:
-                - file
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  test:
+                gmBoardId: 
+                  type: number
+                gmGameLevel:
+                  type: number
+                gmScore:  
+                  type: number
+                gmHisSystem:
+                  type: object
+                gmHisRecord:
+                  type: array
+                  items:
                     type: object
-  /upload-file:
-    post:
-      summary: Upload file
-      operationId: uploadFile
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
+                    properties:
+                      question:
+                        type: string
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            answer:
+                              type: string
+                            ansScore:
+                              type: integer
+                    required:
+                    - question
+                    - answers
+              required:
+                - gmBoardId
+                - gmGameLevel
+                - gmScore
+                - gmHisSystem
+                - gmHisRecord
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                  file:
-                    type: string
         '400':
           description: Bad Request
           content:
@@ -962,4 +950,7 @@ paths:
                 type: object
                 properties:
                   message:
-                    type: string                                                                                 
+                    type: string
+
+  
+  

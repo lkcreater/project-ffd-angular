@@ -1,6 +1,6 @@
 <div class="box-input-update-text">
   <div class="input-update-text flex justify-between">
-    <div class="flex items-center">
+    <div class="flex items-center gap-2">
       <div class="w-11">
         <img
           [class]="connect[type].classImage"
@@ -8,11 +8,13 @@
           [alt]="type"
         />
       </div>
-      @if(data.type != 'LINE' && data.isConnected == false) {
-        <i>เชื่อมต่อบัญชี</i>
-      }@else {
+      <div class="w-28 lg:w-full">
+        @if(data.type != 'LINE' && data.isConnected == false) {
+        <i class="">เชื่อมต่อบัญชี</i>
+        }@else {
         <span class="label">{{ labelAccount() }}</span>
-      }
+        }
+      </div>
     </div>
     @if(data.isConnected == true) {
     <button
@@ -20,6 +22,7 @@
       nzPopconfirmTitle="คุณต้องการ Disconnect บัญชีนี้ใช่หรือไม่"
       nzOkText="ยืนยัน"
       nzCancelText="ยกเลิก"
+      [id]="'btn-disconnect-' + index"
       (nzOnConfirm)="actionAccount()"
       [class]="connect[type].classButton"
       [class.disconnect]="true"
@@ -30,6 +33,7 @@
     </button>
     } @else {
     <button
+      [id]="'btn-connect-' + index"
       [class]="connect[type].classButton"
       [disabled]="data.buttonDisable"
       type="button"

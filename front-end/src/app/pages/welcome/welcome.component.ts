@@ -17,13 +17,12 @@ import { HomeComponent } from '../home/home.component';
     LoadingComponent,
     CardWelcomeComponent,
     CardRegisterSuccessComponent,
-    HomeComponent
+    HomeComponent,
   ],
   templateUrl: './welcome.component.html',
   styleUrls: ['./welcome.component.scss'],
 })
 export class WelcomeComponent implements OnInit {
- 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private userInfoService: UserInfoService

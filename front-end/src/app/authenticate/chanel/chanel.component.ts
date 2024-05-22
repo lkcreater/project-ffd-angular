@@ -8,6 +8,7 @@ import { DrawerTermConditionComponent, IContentDrawer } from '../../components/d
 import { TermConditionService } from '../../services/term-condition/term-condition.service';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { ILineProviderEnv, TChanelAuthen } from '../../core/interfaces';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-chanel',
@@ -23,11 +24,20 @@ import { ILineProviderEnv, TChanelAuthen } from '../../core/interfaces';
 export class ChanelComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
+    private location: Location,
     private drawerService: NzDrawerService,
     private lineService: LineService,
     private termConditionService: TermConditionService,
-  ) {}
+  ) {
+    const path = (this.location.getState() as {
+      path: any;
+    });
+    if(path?.path) {
+      this.pathBack = path.path;
+    }
+  }
 
+  pathBack: any[] = ['/auth/sign-in']
   lineProvider: ILineProviderEnv[] = [];
   drawerRef: Subscription | null = null;
 

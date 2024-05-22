@@ -19,6 +19,7 @@ const { TempSecretService } = require('../../../services/temp-secret.service');
 const { DateTz } = require('../../../helpers/date-tz.helper.js');
 
 const messages = require('../../../commons/message');
+const { HistoryPwdService } = require('../../../services/history-pwd.service.js');
 
 //-----------------------------------------------------------
 //-- login Email/Phone
@@ -36,7 +37,7 @@ router.post('/', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+          return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         //-- check action
@@ -46,29 +47,30 @@ router.post('/', async (req, res, next) => {
                 EActionRequest.AUTHEN_CONFIRM
             ].includes(req.body.action)
         ) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.badRequest);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.badRequest);
         }
 
         //-- verify login chanel
         const chanelLogin = await AuthenService.getVerifyLogin(req.body.userName);
         if (!chanelLogin?.uuidAccount) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.success(res, SESSION_ID, null, messages.errors.accountNotFound);
         }
 
         // //-- verify account
         const account = await AccountsService.findAccount(chanelLogin.uuidAccount);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.success(res, SESSION_ID, null, messages.errors.accountNotFound);
         }
 
         //-- ### action FFD_AUTHEN ###
         if (EActionRequest.AUTHEN == req.body?.action) {
-            const secretKey = SecretHelper.getKey();
+            const secretKey = account.uuidAccount;
             await AuthenService.setUpdateSecretKey(chanelLogin.id, secretKey);
             message = messages.success.accountVerifySuccess;
             data = {
                 secretKey,
                 hash: account.accPassword,
+                status: chanelLogin?.status
             };
         }
 
@@ -89,20 +91,22 @@ router.post('/', async (req, res, next) => {
             //-- compare password
             const comfirmPass = await AuthenService.comparePassword(
                 req.body?.passWord,
-                account.accPassword,
+                account.uuidAccount,
             );
             if (comfirmPass) {
                 //-- gen token
                 const token = JwtHelper.getToken(chanelLogin?.uuidAccount);
                 //-- update latest login time
                 await AuthenService.updateLatestLogin(chanelLogin.id);
+                //-- clear history log
+                await HistoryPwdService.clearActivityAuthenPwdByHash(chanelLogin?.uuidAccount);
 
                 data = {
                     isLineConnect,
                     token: token,
                 };
             } else {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.wrong);
+                return RESPONSE.exception(res, SESSION_ID, messages.errors.wrong);
             }
 
         }
@@ -131,26 +135,26 @@ router.post('/authen-confirm', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         //-- verify login chanel
         const chanelLogin = await AuthenService.getVerifyLogin(req.body.userName);
         if (!chanelLogin?.uuidAccount) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
 
         }
 
         // //-- verify account
         const account = await AccountsService.findAccount(chanelLogin.uuidAccount);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
 
         }
 
         //-- ### action AUTHEN_CONFIRM ###
         if (EActionRequest.AUTHEN_CONFIRM !== req.body?.action) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.actionNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.actionNotFound);
         }
 
         let isLineConnect = false;
@@ -180,7 +184,7 @@ router.post('/authen-confirm', async (req, res, next) => {
                 token: token,
             };
         } else {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.wrong);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.wrong);
         }
 
         RESPONSE.success(res, SESSION_ID, data);
@@ -201,25 +205,25 @@ router.post('/create-account', authenMiddlewareTemp, async (req, res, next) => {
         LOGGER.info(dataLogger);
 
         if (EActionRequest.CREATE_ACCOUNT != req.body.action) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.badRequest);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.badRequest);
         }
 
         //-- find temp id
         const tempId = Number(req.temp?.tempId ?? 0);
         const tempSecret = await TempSecretService.findTempById(tempId);
         if (!tempSecret) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         //-- check username exist already
         const chanelLogin = await AuthenService.getVerifyLogin(req.body?.userName);
         if (chanelLogin) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountIsUse);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountIsUse);
         }
 
         const tempLog = tempSecret?.tempLog;
         if (!tempLog?.input) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, 'Invalid input temporary');
+            return RESPONSE.exception(res, SESSION_ID,  messages.errors.invalidInputTemporary);
         }
 
         //-- attribs account
@@ -252,14 +256,14 @@ router.post('/create-account', authenMiddlewareTemp, async (req, res, next) => {
         );
 
         if (isCreateAccount == false) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.transactionCreatingAccount);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.transactionCreatingAccount);
         }
 
         const account = await AccountsService.findAccountByUuid(
             tempSecret.tempUuid,
         );
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         //-- delete temp secret
@@ -327,26 +331,6 @@ router.post('/line', async (req, res, next) => {
         RESPONSE.success(res, SESSION_ID, data, message);
     } catch (err) {
         LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
-        next(err);
-    }
-
-});
-
-
-//-----------------------------------------------------------
-//-- login test
-//-----------------------------------------------------------
-router.get('/test', async (req, res, next) => {
-
-    const SESSION_ID = req.sessionId;
-    try {
-        const hash = '$2a$10$xsYyf9pqUvLgPFoWrxBXAujq.fway8RhFNgFZHyahbHvOZ98D6Co6'
-        const text = SecretHelper.getText(hash);
-        const bcryptHash = SecretHelper.bcryptHash(text);
-
-        const data = { bcryptHash };
-        RESPONSE.success(res, SESSION_ID, data);
-    } catch (err) {
         next(err);
     }
 

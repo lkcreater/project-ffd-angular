@@ -1,10 +1,13 @@
-<app-card-content >
+<app-card-content [hiddenMenu]="true">
   <div class="display">
-    <div class="title mb-7">สวัสดี คุณ {{ account.accFirstname }}</div>
-    <p>มาเช็คสุขภาพการเงินของคุณ</p>
-    <div class="mt-28">
-        <img [src]="imageWelcome" alt="">
+    <div class="title mb-7 text-center font-bold">สวัสดี คุณ {{ account.accFirstname }}</div>
+    <p class="text-[20px] text-center text-[var(--color-five)]">{{ textDetail }}</p>
+    <div class="mt-10">
+        <img class="mx-auto h-[120px]" [src]="imageHcTitle" alt="">
     </div>
+    <div class="mt-10">
+      <img class="mx-auto h-[250px]" [src]="imageHcIcon" alt="">
+  </div>
   </div>
 
   <div footer>

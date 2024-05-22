@@ -9,7 +9,11 @@ import { CardContentComponent } from '../card-content/card-content.component';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
 import { QuestionnaireService } from '../../services/questionnaire/questionnaire.service';
 import { Router } from '@angular/router';
-import { IResultQuestionnaire, IRootQuestion, IRuleResultQuestionnaire } from '../../stores/questionnaire/questionnaire.reducer';
+import {
+  IResultQuestionnaire,
+  IRootQuestion,
+  IRuleResultQuestionnaire,
+} from '../../stores/questionnaire/questionnaire.reducer';
 import { UserInfoService } from '../../services/user-info/user-info.service';
 
 @Component({
@@ -20,13 +24,12 @@ import { UserInfoService } from '../../services/user-info/user-info.service';
     NzNotificationModule,
     CardHealthCheckConfirmComponent,
     CardContentComponent,
-    ProgressBarComponent
+    ProgressBarComponent,
   ],
   templateUrl: './card-health-check.component.html',
   styleUrl: './card-health-check.component.scss',
 })
-export class CardHealthCheckComponent implements OnInit { 
-
+export class CardHealthCheckComponent implements OnInit {
   constructor(
     private router: Router,
     private notification: NzNotificationService,
@@ -34,6 +37,9 @@ export class CardHealthCheckComponent implements OnInit {
     private userInfoService: UserInfoService
   ) {}
 
+  imgBtnPrevUri: string = './assets/question/btn-arrow.png';
+
+  countInitialQuestion: number = 0;
   dataStoreAll!: IResultQuestionnaire | null;
   questionInitail: IRootQuestion[] = [];
   questionGroup: IRootQuestion[] = [];
@@ -53,13 +59,14 @@ export class CardHealthCheckComponent implements OnInit {
   scoreInitail: number = 0;
   scoreGroup: number = 0;
 
+  lockCheckPoint: boolean = false;
+  indexCheckPoint: number = 0;
+  isShowBtnNext: boolean = false;
+  criticalScore: number = 0;
+
   ngOnInit(): void {
-    this.questionnaireService.getQuestionnaire().subscribe(res => {
-      if(res.data == null) {
-        this.notification.error(
-          'แจ้งเตือนจากระบบ',
-          'การโหลด Questionnaire ไม่พบข้อมูล'
-        );
+    this.questionnaireService.getQuestionnaire().subscribe((res) => {
+      if (res.data == null) {
         this.router.navigate(['/']);
       }
 
@@ -73,17 +80,17 @@ export class CardHealthCheckComponent implements OnInit {
       this.questionAll = res?.data?.questions;
 
       //-- set question initail
-      res?.data?.CONFIG?.forEach(item => {
-        if(item.type == 'fixed') {
+      res?.data?.CONFIG?.forEach((item) => {
+        if (item.type == 'fixed') {
           const questions = res?.data?.questions[item.key] ?? null;
-          if(questions) {
-            this.questionInitail = [
-              ...this.questionInitail,
-              ...questions
-            ];
+          if (questions) {
+            this.questionInitail = [...this.questionInitail, ...questions];
           }
-        }else {
-          if(res?.data?.questions[item.key] && res?.data?.questions[item.key]?.length > 0){ 
+        } else {
+          if (
+            res?.data?.questions[item.key] &&
+            res?.data?.questions[item.key]?.length > 0
+          ) {
             this.countQuestion = res?.data?.questions[item.key]?.length;
           }
         }
@@ -95,19 +102,22 @@ export class CardHealthCheckComponent implements OnInit {
 
       //-- setup answer
       this.questionInitail.forEach((item, idx) => {
-        this.answerQuestion[item.hcqId] = null
+        this.answerQuestion[item.hcqId] = null;
       });
-
     });
   }
 
   getChooseChoice(object: any, idx: number) {
     this.index = idx;
     this.currentQuestionId = object.hcqId;
-    if(object.isValid == true) {
+    if (object.isValid == true) {
       this.answerQuestion[object.hcqId] = object;
-    }else {
+    } else {
       this.answerQuestion[object.hcqId] = null;
+    }
+
+    if(object.nextStep == true) {
+      this.btnNextStep();
     }
   }
 
@@ -122,7 +132,7 @@ export class CardHealthCheckComponent implements OnInit {
       return;
     }
 
-    if(answer.isValid == false) {
+    if (answer.isValid == false) {
       this.notification.warning(
         'แจ้งเตือนจากระบบ',
         'กรุณาตรวจสอบคำตอบของท่านก่อนที่จะกดย้อนกลับหรือถัดไป'
@@ -130,29 +140,47 @@ export class CardHealthCheckComponent implements OnInit {
       return;
     }
 
-    this.index++
+    this.index++;
     this._calculateAnswer();
 
-    if(this.isQuestionGroup == false) {
+    //-- calculate check point
+    if(this.lockCheckPoint == false && this.index == this.countQuestionInitial) {
+      this.lockCheckPoint = true;
+      this.indexCheckPoint = this.index;
+    }
+
+    //-- check hidden button next
+    this._checkHiddenBtn();
+
+    if (this.isQuestionGroup == false) {
       this._findGroupQuestion();
-    }else {
+    } else {
       this._calculateQuestionFinal();
     }
   }
 
   btnPrevStep() {
     this._calculateAnswer();
-    const min = this.isQuestionGroup == false ? 0 : (this.countQuestionInitial);
-
-    if (this.index > min) {
+    if(this.lockCheckPoint == false) {
       this.index--;
+      this._checkHiddenBtn();
+    } 
+    else if(this.lockCheckPoint == true && this.index > this.indexCheckPoint) {
+      this.index--;
+      this._checkHiddenBtn();
     }else {
-      if(this.index != 0) {
-        this.notification.warning(
-          'แจ้งเตือนจากระบบ',
-          'ไม่สามารย้อนกลับได้ ระบบได้ทำการ check point คำถามของท่านแล้ว'
-        );
-      }
+      this.notification.warning(
+        'แจ้งเตือนจากระบบ',
+        'ไม่สามารย้อนกลับได้ ระบบได้ทำการ check point คำถามของท่านแล้ว'
+      );
+    }
+  }
+
+  _checkHiddenBtn() {
+    if(this.questionInitail[this.index]?.hcqOptions?.rule == 'multiChoice') {
+      this.isShowBtnNext = true;
+    }else {
+      this.isShowBtnNext = false;
     }
   }
 
@@ -167,44 +195,54 @@ export class CardHealthCheckComponent implements OnInit {
   _findGroupQuestion() {
     const countQuestion = this.questionInitail?.length ?? 0;
 
-    if(countQuestion == this.countAnswer) {
+    if (this.countQuestionInitial == this.countAnswer) {
       let sumInitail = 0;
       let resultType;
 
-      //-- summary score initial screen 
+      //-- summary score initial screen
       for (const [key, item] of Object.entries(this.answerQuestion)) {
-        const object = item as { isValid: boolean; hcqType: string; total: number; };
-        if(object?.isValid == true && object?.hcqType == 'INITIAL') {
-          sumInitail += object?.total ?? 0
-        }      
+        const object = item as {
+          isValid: boolean;
+          hcqType: string;
+          total: number;
+        };
+        if (object?.isValid == true && object?.hcqType == 'INITIAL') {
+          sumInitail += object?.total ?? 0;
+        }
       }
 
       //-- convert score to 0
-      sumInitail = (sumInitail < 0) ? 0 : sumInitail;
+      const realScore = sumInitail;
+      this.criticalScore = sumInitail < 0 ? sumInitail : 0;
+      sumInitail = sumInitail < 0 ? 0 : sumInitail;
 
       //-- find questions for group
-      this.rules.forEach(rule => {
-        if(rule?.hcqType == 'INITIAL' && (sumInitail >= rule?.hcrMin && sumInitail <= rule?.hcrMax)) {
+      this.rules.forEach((rule) => {
+        if (
+          rule?.hcqType == 'INITIAL' &&
+          sumInitail >= rule?.hcrMin &&
+          sumInitail <= rule?.hcrMax
+        ) {
           resultType = rule?.hcrResult;
         }
       });
 
       //-- check has type questions
-      if(resultType) {
+      if (resultType) {
         this.resultType = resultType;
-        this.scoreInitail = sumInitail;
-        this.questionGroup = this.questionAll ? this.questionAll[resultType] : [];
+        this.scoreInitail = realScore;
+        this.questionGroup = this.questionAll
+          ? this.questionAll[resultType]
+          : [];
+
         this.isQuestionGroup = true;
 
         //-- set question for group
-        this.questionInitail = [
-          ...this.questionInitail,
-          ...this.questionGroup
-        ];
+        this.questionInitail = [...this.questionInitail, ...this.questionGroup];
 
         //-- set answer for group
         this.questionGroup.forEach((item, idx) => {
-          this.answerQuestion[item.hcqId] = null
+          this.answerQuestion[item.hcqId] = null;
         });
       }
     }
@@ -213,17 +251,21 @@ export class CardHealthCheckComponent implements OnInit {
   _calculateQuestionFinal() {
     const countQuestion = this.questionInitail?.length ?? 0;
 
-    if(countQuestion == this.countAnswer) {
+    if (countQuestion == this.countAnswer) {
       let sumScore = 0;
 
-      //-- summary score by group 
+      //-- summary score by group
       for (const [key, item] of Object.entries(this.answerQuestion)) {
-        const object = item as { isValid: boolean; hcqType: string; total: number; };
-        if(object?.isValid == true && object?.hcqType == this.resultType) {
-          sumScore += object?.total ?? 0
-        }      
+        const object = item as {
+          isValid: boolean;
+          hcqType: string;
+          total: number;
+        };
+        if (object?.isValid == true && object?.hcqType == this.resultType) {
+          sumScore += object?.total ?? 0;
+        }
       }
-      this.scoreGroup = sumScore;
+      this.scoreGroup = sumScore + this.criticalScore;
       this.saveQuestion();
     }
   }
@@ -231,9 +273,9 @@ export class CardHealthCheckComponent implements OnInit {
   _calculateAnswer() {
     let countAns = 0;
     for (const [key, item] of Object.entries(this.answerQuestion)) {
-      if((item as { isValid: boolean })?.isValid == true) {
+      if ((item as { isValid: boolean })?.isValid == true) {
         countAns++;
-      }      
+      }
     }
     this.countAnswer = countAns;
 
@@ -242,18 +284,20 @@ export class CardHealthCheckComponent implements OnInit {
 
   saveQuestion() {
     const token = this.userInfoService.getToken();
-    if(token) {
-      this.questionnaireService.saveQuestionnaire(token, {
-        hcHisSystem: this.dataStoreAll,
-        hcHisAnswer: this.answerQuestion,
-        hcTypeRule: this.resultType,
-        hcScoreInitil: this.scoreInitail,
-        hcHisScore: this.scoreGroup
-      }).subscribe(res => {
-        if(res) {
-          this.isFinish = true;
-        }
-      });
+    if (token) {
+      this.questionnaireService
+        .saveQuestionnaire(token, {
+          hcHisSystem: this.dataStoreAll,
+          hcHisAnswer: this.answerQuestion,
+          hcTypeRule: this.resultType,
+          hcScoreInitil: this.scoreInitail,
+          hcHisScore: this.scoreGroup,
+        })
+        .subscribe((res) => {
+          if (res) {
+            this.isFinish = true;
+          }
+        });
     }
   }
 
@@ -262,5 +306,5 @@ export class CardHealthCheckComponent implements OnInit {
     const total = this.countQuestion || 0;
 
     this.progress = Number(((current * 100) / total).toFixed(0));
-  }  
+  }
 }

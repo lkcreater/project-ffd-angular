@@ -118,6 +118,7 @@ export class ProfileComponent implements OnInit, OnDestroy, AfterViewInit {
           this.actionErrorApi()
         }
         this.notification.success('แจ้งเตือน', 'บันทึกข้อมูลสำเร็จ');
+        this.userInfoService.fetchUserInfo().subscribe();
       });
     }
   }

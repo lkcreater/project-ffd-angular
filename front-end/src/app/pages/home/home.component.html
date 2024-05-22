@@ -1,10 +1,10 @@
-<app-card-content>
+<app-card-content [hiddenHeaderScore]="hiddenHeaderScore">
   <div class="display">
-    <app-home-banner-account></app-home-banner-account>
-    <div class="pt-4">
-      <app-home-banner></app-home-banner>
+    <app-home-banner-account />
+    <div class="my-4">
+      <app-home-banner />
     </div>
-    <div class="py-4">
+    <div class="mt-10">
       <div class="grid grid-cols-2 gap-4 justify-center items-center">
         @for (menu of homeMenuList; track $index) {
 
@@ -13,6 +13,7 @@
           [icon]="menu.icon"
           [bgColor]="menu.color"
           [idName]="menu.id"
+          [page]="menu.page"
         ></app-home-menu>
 
         }

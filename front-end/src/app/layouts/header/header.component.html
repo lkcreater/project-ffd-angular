@@ -1,9 +1,9 @@
-<div class="mb-7">
-  <div class="container mx-auto">
+<div [class]="{ 'mb-7': marginBottom }">
+  <div class="app-container-box">
     <nav class="flex justify-between bg-inherit py-4">
       <!-- logo -->
       <div>
-        <app-logo mode="dark" [routerLink]="['/']" class="cursor-pointer" />
+        <app-logo mode="dark" class="cursor-pointer" />
       </div>
 
       <div>
@@ -14,7 +14,6 @@
 
   <!-- menu -->
   @if (!hiddenMenu) {
-    <app-menu />
+  <app-menu [hiddenHeaderScore]="hiddenHeaderScore"/>
   }
 </div>
-

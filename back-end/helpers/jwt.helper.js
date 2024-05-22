@@ -7,12 +7,12 @@ class JwtHelper {
       uuid: uuid,
       ...option,
     };
-    return jwt.sign(paylaod, env.JWT_SECRET);
+    return jwt.sign(paylaod, env.FFD_UUID_V1,{ expiresIn: '1d' });
   }
 
   static verifyToken(token) {
     try {
-      const verify = jwt.verify(token, env.JWT_SECRET);
+      const verify = jwt.verify(token, env.FFD_UUID_V1);
       return {
         status: true,
         verify,

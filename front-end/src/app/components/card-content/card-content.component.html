@@ -1,17 +1,17 @@
 @if (!hiddenHeader) {
 <!-- header content -->
-<app-header [hiddenMenu]="hiddenMenu"></app-header>
+<app-header [hiddenMenu]="hiddenMenu" [hiddenHeaderScore]="hiddenHeaderScore"></app-header>
 }
 
 <div class="card-content">
   <!-- body content -->
-  <div class="container mx-auto">
+  <div class="container mx-auto lg:px-0 md:px-0 sm:px-0 px-3">
     <ng-content></ng-content>
   </div>
 
   <!-- footer content -->
   <div class="footer">
-    <div class="container mx-auto">
+    <div class="container mx-auto lg:px-0 md:px-0 sm:px-0 px-3">
       <ng-content select="[footer]"></ng-content>
     </div>
   </div>

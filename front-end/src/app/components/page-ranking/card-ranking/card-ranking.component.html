@@ -1,6 +1,6 @@
 <div class="flex flex-col justify-center text-center">
   @if(['2','3'].includes(rank)){
-  <p class="text-[#005DA5] text-[22px]">{{ rank }}</p>
+  <p class="text-[var(--color-primary)] text-[22px]">{{ rank }}</p>
   }
   <span
     nz-icon
@@ -10,7 +10,7 @@
     [style.font-size]="sizeIcon"
   ></span>
   <div
-    class="flex flex-row justify-center bg-[#005DA5] rounded-full items-center"
+    class="flex flex-row justify-center bg-[var(--color-primary)] rounded-full items-center"
     [style.width]="size"
     [style.height]="size"
   >

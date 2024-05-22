@@ -26,7 +26,7 @@ class FuncHelper {
     };
   }
   static obsBaseUrl(){
-    const endPoint =  env.OBS_ENDPOINT;
+    const endPoint =  env.OBS_ENDPOINT.replace('{region}', env.OBS_REGION);
     const bucketName =  env.OBS_BUCKET_NAME
     if (endPoint.startsWith('https://')) {
      return endPoint.replace('https://',`https://${bucketName}.`)

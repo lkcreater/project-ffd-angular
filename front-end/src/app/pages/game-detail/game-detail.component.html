@@ -1,0 +1,12 @@
+@if(isPlaying == false){
+<app-game-render-detail
+  [detail]="playDetail"
+  (onStart)="start($event)"
+></app-game-render-detail>
+} @else {
+<app-game-play
+  [gameHelper]="formatGame"
+  [questionsAll]="questionsAll"
+  [gameBoard]="playDetail"
+/>
+}

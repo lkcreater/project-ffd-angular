@@ -1,0 +1,16 @@
+@if (gameHelper.getFormat() == formatGameKey.GAME_TURE_FALSE) { 
+    @for (question of questionsAll; track $index) {
+        <app-game-true-false
+            *ngIf="$index == index"
+            [gameHelper]="gameHelper"
+            [question]="question"
+            [currentCount]="$index + 1"
+            [totalCount]="questMax"
+            (onAnswer)="onAnswerGame($event)"
+        />
+    } 
+}
+@else if (gameHelper.getFormat() == formatGameKey.GAME_MATCHING) { 
+
+    
+}

@@ -9,8 +9,11 @@ import { HealthCheckComponent } from './health-check/health-check.component';
 import { TestComponent } from './test/test.component';
 import { ProfileConnectComponent } from './profile-connect/profile-connect.component';
 import { ProfileChangePasswordComponent } from './profile-change-password/profile-change-password.component';
-import { HomeComponent } from './home/home.component';
 import { RankingComponent } from './ranking/ranking.component';
+import { GameComponent } from './game/game.component';
+import { GameDetailComponent } from './game-detail/game-detail.component';
+import { GameCompleteComponent } from './game-complete/game-complete.component';
+import { ArticleComponent } from './article/article.component';
 
 const routes: Routes = [
   {
@@ -29,6 +32,27 @@ const routes: Routes = [
       {
         path: 'ranking',
         component: RankingComponent,
+      },
+      {
+        path: 'article',
+        component: ArticleComponent,
+      },
+      {
+        path: 'game',
+        children: [
+          {
+            path: '',
+            component: GameComponent,
+          },
+          {
+            path: 'play/:id',
+            component: GameDetailComponent,
+          },
+          {
+            path: 'complete',
+            component: GameCompleteComponent,
+          },
+        ],
       },
       {
         path: 'profile',

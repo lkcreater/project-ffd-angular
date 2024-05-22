@@ -1,32 +1,37 @@
-<div class="grid">
-  <h2 class="title my-5">{{ nzData.title }}</h2>
-  <div class="h-[calc(100dvh-250px)]">
-    <div class="draw-body-content" #overflowRef (scroll)="onElementScroll()">
-      <p class="content" #contentRef [innerHTML]="nzData.desc"></p>
+<app-header [hiddenMenu]="true" />
+<div class="app-container-box">
+  <div class="grid">
+    <h2 class="title my-5">{{ nzData.title }}</h2>
+    <div class="h-[calc(100dvh-450px)]">
+      <div class="draw-body-content" #overflowRef (scroll)="onElementScroll()">
+        <p class="content" #contentRef [innerHTML]="nzData.desc"></p>
+      </div>
+      <div class="mt-3 pl-7">
+        <label
+          id="checkbox-term-condition"
+          nz-checkbox
+          [(ngModel)]="checked"
+          [disabled]="disableBtn"
+        >
+          {{ nzData.notice }}
+        </label>
+      </div>
     </div>
-    <div class="mt-3 pl-7">
-      <label
-        id="checkbox-term-condition"
-        nz-checkbox
-        [(ngModel)]="checked"
-        [disabled]="disableBtn"
-      >
-        {{ nzData.notice }}
-      </label>
-    </div>
-  </div>
 
-  <div class="draw-footer">
-    <div class="container items-center mx-auto">
-      <button
-        id="btn-term-next"
-        type="button"
-        class="btn-app btn-primary w-full lg:w-4/12 mx-auto"
-        (click)="actionNextSubmit()"
-      >
-        <span>ถัดไป</span>
-        <img class="ml-3" src="assets/btn-logo/next-btn.svg" alt="logo" />
-      </button>
+    <div class="draw-footer">
+      <div class="container items-center mx-auto lg:px-0 md:px-0 sm:px-0 px-3">
+        <button
+          id="btn-term-next"
+          type="button"
+          class="btn-app btn-primary w-full lg:w-4/12 mx-auto"
+          [disabled]="checked == false ? true : false"
+          (click)="actionNextSubmit()"
+        >
+          <span>ถัดไป</span>
+          <!-- <img class="ml-3" src="assets/btn-logo/next-btn.svg" alt="logo" /> -->
+        </button>
+      </div>
     </div>
   </div>
 </div>
+

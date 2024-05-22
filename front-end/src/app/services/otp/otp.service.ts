@@ -35,9 +35,45 @@ export class OtpService {
       response_datetime: string;
       response_code: string | number;
       response_desc: string;
-    }>>(ApiHelper.api('require/verify-otp'), body, {
+    }>>(ApiHelper.api('require/verify-otp'), {
+      otp: body.otp,
+      token_uuid: body.secret
+    }, {
       headers: ApiHelper.header({ token })
     })
+    .pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  //-- save his OTP
+  saveHisOtp(body: { 
+    otpHisAction: string;
+    otpHisType: string;
+    otpHisInput: string;
+    otpHisSecret: string;
+    otpHisPac: string;
+    otpHisIsValid: boolean | null;
+  }) {
+    return this.http.post<IApiResponse<{
+      FindHistory: any[];
+      MAX_OTP_REQUESTS: number;
+      BLOCK_DURATION_MINUTES: number;
+      OTP_LIMIT_WRONG: number;
+    }>>(ApiHelper.api('require/save-history-otp'), body)
+    .pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  //-- get his OTP
+  getHisOtp(body: { 
+    otpHisAction: string;
+    otpHisType: string;
+    otpHisInput: string;
+  }) {
+    return this.http.post<IApiResponse<{
+      FindHistory: any[];
+      MAX_OTP_REQUESTS: number;
+      BLOCK_DURATION_MINUTES: number;
+      OTP_LIMIT_WRONG: number;
+    }>>(ApiHelper.api('require/history-otp'), body)
     .pipe(map(res => this.utilsService.handleResponse(res)));
   }
 }

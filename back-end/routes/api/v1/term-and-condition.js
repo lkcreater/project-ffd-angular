@@ -28,7 +28,7 @@ router.get('/', async (req, res, next) => {
         const terms = await TermAndConditionService.getTermAndCondition();
 
         if (!terms) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.termAndConditionNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.termAndConditionNotFound);
         }
 
         RESPONSE.success(res, SESSION_ID, terms, messages.success.getTermAndConditionSuccess);
@@ -51,7 +51,7 @@ router.post('/action', authenMiddlewareTemp, async (req, res, next) => {
         const tempId = Number(req.temp?.tempId ?? 0);
         const temp = await TempSecretService.findTempById(tempId);
         if (!temp) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.badRequest);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.badRequest);
         }
 
         let data = null;
@@ -93,7 +93,7 @@ router.post('/action', authenMiddlewareTemp, async (req, res, next) => {
                 attribsLogin,
             );
             if (isCreateAccount == false) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.transactionCreatingAccount);
+                return RESPONSE.exception(res, SESSION_ID, messages.errors.transactionCreatingAccount);
             } else {
                 //-- find account
                 const lineAccount = await AccountsService.findAccountByUuid(

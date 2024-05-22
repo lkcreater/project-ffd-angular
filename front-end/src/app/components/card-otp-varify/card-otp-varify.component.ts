@@ -22,6 +22,7 @@ import {
 } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 import {
   finalize,
   interval,
@@ -33,19 +34,24 @@ import { isPlatformBrowser } from '@angular/common';
 import { OtpService } from '../../services/otp/otp.service';
 import { TextHelper } from '../../helpers/text.helper';
 import { TChanelAuthen } from '../../core/interfaces';
+import { ModalAlertComponent } from '../modal-alert/modal-alert.component';
 
-const TIME_OTP = 60;
+const TIME_OTP = 60; //-- 60 seconds
+const HIT_TYPE_VERIFY = 'VERIFY';
+const HIT_TYPE_REQEUST = 'REQEUST';
+const HIT_TYPE_ALL = 'ALL';
 
 @Component({
   selector: 'app-card-otp-varify',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, NzInputModule, NzFormModule],
+  imports: [FormsModule, ReactiveFormsModule, NzInputModule, NzFormModule, NzAlertModule, ModalAlertComponent],
   templateUrl: './card-otp-varify.component.html',
   styleUrl: './card-otp-varify.component.scss',
 })
 export class CardOtpVarifyComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
+  @Input({ required: true }) typeOtp!: string;
   @Input({ required: true }) type!: TChanelAuthen | string;
   @Input({ required: true }) input!: string;
   @Input({ required: true }) token!: string;
@@ -74,8 +80,22 @@ export class CardOtpVarifyComponent
     }
 
     if (isPlatformBrowser(this.platformId)) {
-      //-- requast otp
-      this.sendingOtp();
+      this.otpService.getHisOtp({
+        otpHisAction: HIT_TYPE_ALL,
+        otpHisType: this.typeOtp,
+        otpHisInput: this.input,
+      }).subscribe(res => {
+        if(res) {
+          this.setObjectHistory(HIT_TYPE_VERIFY, res, true);
+          this.setObjectHistory(HIT_TYPE_REQEUST, res, true);
+
+          //-- requast otp
+          if(this.otpIsBlock == false && this.otpIsBlockRequest == false) {
+            this.sendingOtp();
+          }
+        }
+      })
+      
     }
   }
 
@@ -86,10 +106,24 @@ export class CardOtpVarifyComponent
   }
 
   ngAfterViewInit(): void {
-    if (this.refInput) {
+    if (this.refInput && this.otpIsBlock == false) {
       this.refInput.first.nativeElement.focus();
     }
   }
+
+  isFirstRequestOtp: boolean = true;
+
+  //-- configure otp
+  otpLimitWrong: number = 0;
+  otpMaxRequest: number = 0;
+  otpBlockDulationTime: number = 15;
+  otpHistory: Record<string, any[]> = {};
+  otpWarningMsg!: string;
+  otpBlockMsg!: string;
+  otpRequestMsg!: string; 
+  otpAlertMsg!: string;
+  otpIsBlock: boolean = false; //-- block verify
+  otpIsBlockRequest: boolean = false; //-- block request
 
   validateForm: FormRecord<FormControl<string>> = this.fb.record({});
   listOfControl: Array<{ id: number; controlInstance: string }> = [];
@@ -104,6 +138,7 @@ export class CardOtpVarifyComponent
   timeRemaining: number = TIME_OTP;
   timeCountdown: number = TIME_OTP;
   timeFinished: boolean = false;
+  isFirstRenderBlockRequest: boolean = false;
 
   otpObjectRef = {
     code: '',
@@ -119,13 +154,6 @@ export class CardOtpVarifyComponent
         }),
         takeWhile((value) => value >= 0),
         finalize(() => {
-          this.otpObjectRef = {
-            code: '',
-            secret: '',
-            type: '',
-          };
-          
-          this.validateForm.disable();
           this.timeCountdown = TIME_OTP;
           this.timeFinished = true
         })
@@ -139,12 +167,19 @@ export class CardOtpVarifyComponent
     this.otpService.sendOtpRequest(this.token, this.input).subscribe(res => {
       if(res) {
         this.otpObjectRef = res
+        this.saveHistoryOtp(HIT_TYPE_REQEUST);
         this.setTimeOtp();
       }
     });
   }
 
   resendOtp() {
+    //-- reset request otp
+    this.otpWarningMsg = '';
+
+
+    this.revokeOtp(this.otpObjectRef);
+    this.isFirstRequestOtp = false;
     this.timeFinished = false;
     this.sendingOtp();
     this.resetForm();
@@ -193,7 +228,7 @@ export class CardOtpVarifyComponent
   }
 
   submitFrom() {
-    if (this.validateForm.valid && !this.timeFinished) {
+    if (this.validateForm.valid) {
       this.validateForm.disable();
       const valuesArray = Object.values(this.validateForm.value);
       const value = valuesArray.join('');
@@ -207,6 +242,14 @@ export class CardOtpVarifyComponent
           secret: this.otpObjectRef.secret,
           otp: value
         });
+
+        if(res?.isValid == true) {
+          this.revokeOtp(this.otpObjectRef);
+        }
+
+        //-- save history
+        this.saveHistoryOtp(HIT_TYPE_VERIFY, res?.isValid);
+
         this.resetForm();
       });
     } else {
@@ -217,5 +260,101 @@ export class CardOtpVarifyComponent
         }
       });
     }
+  }
+
+  saveHistoryOtp(action: string, isValid: boolean | null = null) {
+    this.otpService.saveHisOtp({
+      otpHisAction: action,
+      otpHisType: this.typeOtp,
+      otpHisInput: this.input,
+      otpHisSecret: this.otpObjectRef.secret,
+      otpHisPac: this.otpObjectRef.code,
+      otpHisIsValid: isValid,
+    }).subscribe(his => {
+      if(his){
+        this.setObjectHistory(action, his);
+      }
+    });
+  }
+
+  setObjectHistory(action: string, response: {
+    FindHistory: any[];
+    MAX_OTP_REQUESTS: number;
+    BLOCK_DURATION_MINUTES: number;
+    OTP_LIMIT_WRONG: number;
+  }, isView: boolean = false) {
+    this.otpHistory[action] = response?.FindHistory ?? [];
+    this.otpMaxRequest = response?.MAX_OTP_REQUESTS ?? 0;
+    this.otpLimitWrong = response?.OTP_LIMIT_WRONG ?? 0; //-- กรอกผิดลิมิต
+    this.otpBlockDulationTime = response?.BLOCK_DURATION_MINUTES ?? 15;
+
+    //-- verify wrong
+    if(action == HIT_TYPE_VERIFY && this.otpHistory[action].length > 0 && this.otpLimitWrong > 0) {
+      console.log(HIT_TYPE_VERIFY);
+      
+      const otp_secret = this.otpObjectRef?.secret;
+      let limitVerified = 0;
+      response?.FindHistory?.forEach(history => {
+        if(history?.otpHis_otp_his_secret == otp_secret) {
+          limitVerified++;
+        }
+      });
+
+      const verifyCountAllowed = this.otpLimitWrong - limitVerified;
+      if(isView == false) {
+        this.otpWarningMsg = `คุณสามารถตรวจสอบ OTP ของคุณได้อีก ${verifyCountAllowed} ครั้ง`;
+      }
+
+      if(verifyCountAllowed <= 0) {
+        this.otpIsBlock = true;
+        this.otpBlockMsg = `ระบบทำการบล็อกคุณ ${this.otpBlockDulationTime} นาที เนื่องจากกรอก OTP ผิดเกินจำนวนที่กำหนด`;
+      }else{
+        this.otpIsBlock = false;
+      }
+    }
+
+    //-- request otp
+    if(action == HIT_TYPE_REQEUST && this.otpHistory[action].length > 0 && this.otpMaxRequest > 0) {
+      let limitRequest = 0;
+      response?.FindHistory?.forEach(history => {
+        if(history?.otpHis_otp_his_action == HIT_TYPE_REQEUST) {
+          limitRequest++;
+        }
+      });
+
+      const requestCountLimit = this.otpMaxRequest - limitRequest;
+      this.otpRequestMsg = `สามารถขอ OTP ได้อีก ${requestCountLimit} ครั้ง`;
+      if(requestCountLimit <= 0) {
+        this.otpIsBlockRequest = true;
+        this.otpRequestMsg = `คุณถูกระงับการขอ OTP เป็นเวลา ${this.otpBlockDulationTime} นาที`;
+      } 
+
+      if(isView && this.otpIsBlockRequest) {
+        this.isFirstRenderBlockRequest = true;
+      }
+    }
+
+    if(this.otpIsBlock) {
+      this.otpAlertMsg = this.otpBlockMsg;
+    }
+
+    if(this.otpIsBlockRequest) {
+      this.otpAlertMsg = this.otpRequestMsg;
+    }
+  }
+
+  revokeOtp(key: any) {
+    //console.log('revoke --> ', key);
+  }
+
+  isOpenModal: boolean = false;
+  modal = {
+    title: '',
+    message: ''
+  }
+  openModalAlert(title: string, message: string) {
+    this.isOpenModal = true;
+    this.modal.title = title;
+    this.modal.message = message;
   }
 }

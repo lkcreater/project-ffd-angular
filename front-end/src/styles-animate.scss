@@ -1,0 +1,118 @@
+.app-game {
+    .question {
+        @apply opacity-0;
+
+        &.active {
+            animation-name: gameRunQuestion;
+            animation-duration: 1s;
+            animation-fill-mode: forwards;
+        }
+    }
+
+    .answer-explain {
+        @apply scale-0;
+
+        &.active { 
+            animation-name: gameAnswerExplain;
+            animation-duration: 2s;
+            animation-fill-mode: forwards;
+        }
+    }
+}
+
+//-- game true false
+.choice-answer {
+    .game-true-false {
+        .overlay{
+            &.yes {
+                @apply bg-[#005da5c9];
+            }
+
+            &.no {
+                @apply bg-[#e21f26ba];
+            }
+
+            .icon-game {
+                @apply block;
+            }
+        }
+    }
+}
+
+.game-true-false {
+    &.is-select {
+        animation-name: gameChooseAnswer;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+    }
+}
+
+.animate_zoom {
+    @apply scale-0;
+
+    &.animated {
+        animation-name: animateZoomIn;
+        animation-duration: var(--animation-zoom-duration);
+        animation-fill-mode: forwards;
+    }
+}
+
+@keyframes animateZoomIn {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.animate_fadeIn {
+    @apply opacity-0 relative;
+
+    &.animated {
+        animation-name: animateFadeIn;
+        animation-duration: var(--animation-fade-duration);
+        animation-fill-mode: forwards;
+    }
+}
+
+@keyframes animateFadeIn {
+    from {
+        @apply opacity-0 left-7;
+    }
+    to {
+        @apply opacity-100 left-0;
+    }
+}
+
+@keyframes gameAnswerExplain {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes gameRunQuestion {
+    from {
+        @apply opacity-0;
+    }
+    to {
+        @apply opacity-100;
+    }
+}
+
+@keyframes gameChooseAnswer {
+    0% { @apply opacity-100; }
+    10% { @apply opacity-30; }
+    20% { @apply opacity-100; }
+    30% { @apply opacity-30; }
+    40% { @apply opacity-100; }
+    50% { @apply opacity-30; }
+    60% { @apply opacity-100; }
+    70% { @apply opacity-30; }
+    80% { @apply opacity-100; }
+    90% { @apply opacity-30; }
+    100% { @apply opacity-100; }
+}

@@ -15,18 +15,6 @@ module.exports = new EntitySchema({
             name: "order",
             default: 0,
         },
-        idNo: {
-            type: "varchar",
-            length: 250,
-            name: "id_no",
-            nullable: true,
-        },
-        passwordNo: {
-            type: "varchar",
-            length: 250,
-            name: "password_no",
-            nullable: true,
-        },
         ffdBusinessConsentGroup: {
             type: "int",
             name: "ffd_business_consent_group"

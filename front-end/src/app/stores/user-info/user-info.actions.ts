@@ -17,6 +17,20 @@ export interface IPeronaIcon {
   updatedDatetime: string
 }
 
+export interface IRankingScoreMe {
+  rankId: number
+  uuidAccount: string
+  rankScore: number
+  rankScoreTotal: number
+  rankDateCalculate: string
+  rankObject: any
+  active: boolean
+  createdBy: string
+  updatedBy: string
+  createdDatetime: string
+  updatedDatetime: string
+}
+
 export interface IInfoProfile {
   hasPassword: boolean;
   compCode?: any;
@@ -37,6 +51,7 @@ export interface IInfoProfile {
   updatedDatetime: string;
   chanelLogin: ILoginChanel[];
   peronaIcon: IPeronaIcon;
+  rankHistory: IRankingScoreMe | null
 }
 export interface ILoginChanel {
   id: number;

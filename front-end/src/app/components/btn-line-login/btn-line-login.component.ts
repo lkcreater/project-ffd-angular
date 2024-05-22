@@ -40,8 +40,8 @@ export class BtnLineLoginComponent {
     }
 
     this.notification.error(
-      'Not found line provider',
-      'please check line provider!'
+      'ไม่พบ line provider',
+      'กรุณาตรวจสอบ line provider!'
     );
     return false;
   }

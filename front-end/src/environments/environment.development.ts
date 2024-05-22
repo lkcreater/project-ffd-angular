@@ -1,8 +1,9 @@
 export const environment = {
   name: 'sit',
   production: false,
-  hostApi: 'http://159.138.242.188:3000',
+  hostApi: 'https://ffd-api-dev.automer.io',
   hostName: 'https://ffd-cms-dev.automer.io',
+  isDemo: true
 };
 
 // '2003704839': {

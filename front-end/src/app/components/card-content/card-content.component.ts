@@ -12,4 +12,5 @@ import { HeaderComponent } from '../../layouts/header/header.component';
 export class CardContentComponent {
   @Input() hiddenMenu: boolean = false;
   @Input() hiddenHeader: boolean = false;
+  @Input() hiddenHeaderScore: boolean = false;
 }

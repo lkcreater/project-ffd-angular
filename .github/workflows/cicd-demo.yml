@@ -1,0 +1,187 @@
+name: CICD - DEMO finfreedom_v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-version:
+        description: "build version demo"
+        required: true
+      build-env:
+        type: choice
+        options:
+            - "dev"
+            - "prod"
+        description: "build image env"
+        required: true
+
+env:
+    IMG_ADDRESS: swr.${{ secrets.SWR_REGION }}.myhuaweicloud.com
+    IMG_USERNAME: ${{ secrets.SWR_REGION }}@${{ secrets.SWR_AK_KEY }}
+    IMG_ORGANIZATION: tisco-finfreedom
+    IMG_NAME: demo-ffd
+    IMG_VERSION: v${{ github.event.inputs.build-version }}
+    IMG_PROJECT: demo
+    DIR_WORKING_BACKEND: back-end
+    DIR_WORKING_FRONTEND: front-end
+    ENV_BRANCH: 'demo'
+    FOLDER_CONFIG: ./deployment
+    SERVICE_COMPOSE: demo-compose.yml
+
+jobs:
+    build-api:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+              node-version: [20.x]
+    
+        steps:
+            - uses: actions/checkout@v4
+              with: 
+                ref: ${{ env.ENV_BRANCH }}
+            - name: Use Nodejs version ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{ matrix.node-version }}
+            - run: npm install
+              working-directory: ${{ env.DIR_WORKING_BACKEND }}
+            - run: npm ci --if-present
+              working-directory: ${{ env.DIR_WORKING_BACKEND }}
+            - run: |
+                echo "Build node version: ${{ matrix.node-version }} -- ENV Version: ${{ env.DIR_WORKING_BACKEND }} | ${{ github.event.inputs.build-version }}"
+    
+    buildimage-api:
+        runs-on: ubuntu-latest
+        needs: [build-api]
+        steps:
+            - uses: actions/checkout@v4
+              with: 
+                ref: ${{ env.ENV_BRANCH }}
+            - name: setup password SWR
+              run: |
+                echo "GITENV_PASSWORD_SWR=$(printf '${{ secrets.SWR_AK_KEY }}' | openssl dgst -binary -sha256 -hmac '${{ secrets.SWR_SK_KEY }}' | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')" >> $GITHUB_ENV
+            - name: Login SWR huawei cloud
+              run: |
+                docker login -u $IMG_USERNAME -p $GITENV_PASSWORD_SWR $IMG_ADDRESS
+                echo "Login huawei cloud [SWR]"
+            - name: Build and Push image to cloud
+              working-directory: ${{ env.DIR_WORKING_BACKEND }}
+              run: | 
+                docker build --build-arg ENV_BUILD=${{ github.event.inputs.build-env }} -t ${{ env.IMG_ADDRESS }}/${{ env.IMG_ORGANIZATION }}/${{ env.IMG_NAME }}-${{ env.DIR_WORKING_BACKEND }}:${{ env.IMG_VERSION }} .
+                docker push ${{ env.IMG_ADDRESS }}/${{ env.IMG_ORGANIZATION }}/${{ env.IMG_NAME }}-${{ env.DIR_WORKING_BACKEND }}:${{ env.IMG_VERSION }}
+            - name: Logout SWR
+              run: |
+                docker logout ${{ env.IMG_ADDRESS }} 
+    
+    build-web:
+        runs-on: ubuntu-latest
+        needs: [buildimage-api]
+        strategy:
+            matrix:
+                node-version: [20.x]
+    
+        steps:
+            - uses: actions/checkout@v4
+              with: 
+                ref: ${{ env.ENV_BRANCH }}
+            - name: Use Nodejs version ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{ matrix.node-version }}
+            - run: npm install
+              working-directory: ${{ env.DIR_WORKING_FRONTEND }}
+            - run: npm ci --if-present
+              working-directory: ${{ env.DIR_WORKING_FRONTEND }}
+            - run: |
+                echo "Build node version: ${{ matrix.node-version }} -- ENV Version: ${{ env.DIR_WORKING_FRONTEND }} | ${{ github.event.inputs.build-version }}"
+    
+    buildimage-web:
+        runs-on: ubuntu-latest
+        needs: [build-web]
+        steps:
+            - uses: actions/checkout@v4
+              with: 
+                ref: ${{ env.ENV_BRANCH }}
+            - name: setup password SWR
+              run: |
+                echo "GITENV_PASSWORD_SWR=$(printf '${{ secrets.SWR_AK_KEY }}' | openssl dgst -binary -sha256 -hmac '${{ secrets.SWR_SK_KEY }}' | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')" >> $GITHUB_ENV
+            - name: Login SWR huawei cloud
+              run: |
+                docker login -u $IMG_USERNAME -p $GITENV_PASSWORD_SWR $IMG_ADDRESS
+                echo "Login huawei cloud [SWR]"
+            - name: Build and Push image to cloud
+              working-directory: ${{ env.DIR_WORKING_FRONTEND }}
+              run: | 
+                docker build --build-arg ENV_BUILD=${{ github.event.inputs.build-env }} -t ${{ env.IMG_ADDRESS }}/${{ env.IMG_ORGANIZATION }}/${{ env.IMG_NAME }}-${{ env.DIR_WORKING_FRONTEND }}:${{ env.IMG_VERSION }} .
+                docker push ${{ env.IMG_ADDRESS }}/${{ env.IMG_ORGANIZATION }}/${{ env.IMG_NAME }}-${{ env.DIR_WORKING_FRONTEND }}:${{ env.IMG_VERSION }}
+            - name: Logout SWR
+              run: |
+                docker logout ${{ env.IMG_ADDRESS }} 
+
+    deploy:
+        name: Deploy
+        runs-on: ubuntu-latest
+        needs: [buildimage-api, buildimage-web]
+        steps:
+            - uses: actions/checkout@v4
+            - name: echo version
+              run: |
+                echo "ENV = ${{ github.event.inputs.build-env }}"
+                echo "WEB = ${{ env.IMG_NAME }}-${{ env.DIR_WORKING_FRONTEND }}:${{ env.IMG_VERSION }}"
+                echo "API = ${{ env.IMG_NAME }}-${{ env.DIR_WORKING_BACKEND }}:${{ env.IMG_VERSION }}"
+            - name: CMD write version image
+              run: |
+                sed -i "s/<<SWR_HOST>>/$VAR_IMG_HOST/g" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/<<SWR_IMG_FRONT_END>>/$VAR_IMG_FRONT_END/" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/<<SWR_IMG_BACK_END>>/$VAR_IMG_BACK_END/" ${{ env.SERVICE_COMPOSE }}
+                sed -i "s/<<SWR_VERSION>>/$VAR_IMG_VERSION/" ${{ env.SERVICE_COMPOSE }}
+                cat ${{ env.SERVICE_COMPOSE }}
+              env: 
+                VAR_IMG_HOST: ${{ env.IMG_ADDRESS }}
+                VAR_IMG_VERSION: ${{ env.IMG_VERSION }}
+                VAR_IMG_FRONT_END: ${{ env.IMG_NAME }}-${{ env.DIR_WORKING_FRONTEND }}
+                VAR_IMG_BACK_END: ${{ env.IMG_NAME }}-${{ env.DIR_WORKING_BACKEND }}
+
+            - name: Configure SSH
+              run: | 
+                mkdir -p ~/.ssh/
+                echo "$SSH_KEY" > ~/.ssh/KeyPair-e7ac.pem
+                chmod 600 ~/.ssh/KeyPair-e7ac.pem
+                cat >> ~/.ssh/config <<END
+                Host staging-host
+                    HostName $SSH_HOST
+                    User $SSH_USER
+                    IdentityFile ~/.ssh/KeyPair-e7ac.pem
+                    StrictHostKeyChecking no
+                END
+              env:
+                SSH_USER: ${{ secrets.SSH_USERNAME }}
+                SSH_KEY: ${{ secrets.SSH_KEY }}
+                SSH_HOST: ${{ secrets.SSH_HOST_DEMO }}
+
+            - name: test whoami
+              run: ssh staging-host 'whoami'
+
+            - name: copy file folder config
+              run: scp -r ${{ env.FOLDER_CONFIG }} staging-host:~
+
+            - name: copy file service compose
+              run: scp ${{ env.SERVICE_COMPOSE }} staging-host:~
+
+            - name: setup password SWR
+              run: |
+                echo "GITENV_PASSWORD_SWR=$(printf '${{ secrets.SWR_AK_KEY }}' | openssl dgst -binary -sha256 -hmac '${{ secrets.SWR_SK_KEY }}' | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')" >> $GITHUB_ENV
+
+            - name: Docker login SWR
+              run: ssh staging-host 'docker login -u ${{ env.IMG_USERNAME }} -p ${{ env.GITENV_PASSWORD_SWR }} ${{ env.IMG_ADDRESS }}'
+
+            - name: Down service container
+              run: ssh staging-host 'docker-compose -f ${{ env.SERVICE_COMPOSE }} down'
+
+            - name: Remove image older than 10 days
+              run: ssh staging-host 'docker image prune -a --force --filter "until=240h"'
+            
+            - name: Start service container
+              run: ssh staging-host 'docker-compose -f ${{ env.SERVICE_COMPOSE }} up -d'
+
+            - name: Logout SWR
+              run: ssh staging-host 'docker logout ${{ env.IMG_ADDRESS }}'

@@ -10,6 +10,12 @@ module.exports = new EntitySchema({
       generated: true,
       name: 'icon_id',
     },
+    iconType: {
+      type: 'varchar',
+      length: 150,
+      name: 'icon_type',
+      nullable: true
+    },
     iconLevel: {
       type: 'int',
       name: 'icon_level',

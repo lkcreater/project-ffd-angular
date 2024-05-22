@@ -1,10 +1,12 @@
 import { Component, Inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import {
+  AbstractControl,
   FormControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -15,11 +17,12 @@ import { CardContentComponent } from '../../components/card-content/card-content
 import { CardOtpVarifyComponent } from '../../components/card-otp-varify/card-otp-varify.component';
 import { InputSetPasswordComponent } from '../../components/inputs/input-set-password/input-set-password.component';
 import { InputInfoProfileComponent } from '../../components/inputs/input-info-profile/input-info-profile.component';
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthenService } from '../../services/authen/authen.service';
 import { TChanelAuthen } from '../../core/interfaces';
 import { UserInfoService } from '../../services/user-info/user-info.service';
 import { IInfoProfile } from '../../stores/user-info/user-info.actions';
+import { ModalAlertComponent } from '../../components/modal-alert/modal-alert.component';
 
 export interface IStateObject {
   term: { condiVersion: string; option: number } | null;
@@ -39,6 +42,8 @@ export interface IStateObject {
     InputSetPasswordComponent,
     CardOtpVarifyComponent,
     CardContentComponent,
+    CommonModule,
+    ModalAlertComponent
   ],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
@@ -78,7 +83,37 @@ export class SignUpComponent {
   ngOnInit(): void {
     this.type = this.stateObject?.type as 'EMAIL' | 'PHONE';
     this.label = this.constrant[this.type] ?? '';
+
+    if (['EMAIL', 'PHONE'].includes(this.type)) {
+      console.log('this loop ===>', this.type);
+      this.validateForm = this.fb.group({
+        userName: ['', [this.customValidator]],
+      });
+    }
   }
+
+  customValidator: ValidatorFn = (control: AbstractControl) => {
+    if (!control.value) {
+      return { error: true, message: 'กรุณากรอก ' + this.label };
+    } else if (control.value) {
+      let regex;
+      if (this.type == 'EMAIL') {
+        regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      }
+      if (this.type == 'PHONE') {
+        regex = /^[0-9]{10}$/;
+      }
+      if (!regex?.test(control.value)) {
+        return {
+          error: true,
+          message: 'กรุณากรอกรูปแบบ ' + this.label + ' ให้ถูกต้อง',
+        };
+      } else {
+        return null;
+      }
+    }
+    return {};
+  };
 
   logoImage = './assets/icons/icon-signup.png';
   successImage = './assets/success/success.png';
@@ -116,7 +151,9 @@ export class SignUpComponent {
     //-- step input
     if (this.stepNext == 'input') {
       if (this.validateForm.valid) {
-        const input = this.validateForm.controls.userName.value;
+        const inputData = this.validateForm.controls.userName.value;
+        const input = inputData.toLowerCase();
+
         this.authenService.verifyInput(input).subscribe((res) => {
           if (res && res.isExistAlready == false) {
             this.setupInput({
@@ -125,10 +162,11 @@ export class SignUpComponent {
             });
             this.stepNext = 'otp';
           } else if (res && res.isExistAlready == true) {
-            this.notification.warning(
-              'แจ้งเตือน',
-              'บัญชีนี้ถูกใช้งานแล้ว กรุณาลองใหม่'
+            this.openModalAlert(
+              'ชื่อผู้ใช้งานไม่ถูกต้อง',
+              'ตรวจพบชื่อผู้ใช้งานลงทะเบียนซ้ำ กรุณาเปลี่ยนชื่อผู้ใช้ใหม่อีกครั้ง'
             );
+            this.validateForm.reset();
           }
         });
       } else {
@@ -161,9 +199,9 @@ export class SignUpComponent {
     if (data.verify) {
       this.stepNext = 'password';
     } else {
-      this.notification.warning(
-        'แจ้งเตือน',
-        'การตรวจสอบ OTP ของท่านไม่ถูกต้อง'
+      this.openModalAlert(
+        'รหัส OTP ไม่ถูกต้อง',
+        'กรุณากรอกรหัส OTP ใหม่อีกครั้ง'
       );
     }
   }
@@ -174,10 +212,6 @@ export class SignUpComponent {
     confirmPassword: string;
     hash: string;
   }) {
-    if (!this.inputObject.token) {
-      this.notification.warning('แจ้งเตือน', 'เกิดข้อผิดพลาดจากระบบ');
-    }
-
     this.authenService
       .createEmailOrPhone(this.inputObject.token, {
         userName: this.inputObject.input,
@@ -211,5 +245,16 @@ export class SignUpComponent {
         'การบันทึกข้อมูลผู้ใช้งานเกิดข้อผิดพลาด'
       );
     }
+  }
+
+  isOpenModal: boolean = false;
+  modal = {
+    title: '',
+    message: ''
+  }
+  openModalAlert(title: string, message: string) {
+    this.isOpenModal = true;
+    this.modal.title = title;
+    this.modal.message = message;
   }
 }

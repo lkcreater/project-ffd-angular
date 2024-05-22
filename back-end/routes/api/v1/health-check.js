@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
         const uuid = req.authen?.uuid ?? 'NONE';
         const account = await AccountsService.findAccountByUuid(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         const compCode = account.compCode || 'NONE';
@@ -103,7 +103,7 @@ router.post('/save-answer', async (req, res, next) => {
         const uuid = req.authen?.uuid ?? 'NONE';
         const account = await AccountsService.findAccount(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         const attribsHistory = {
@@ -118,14 +118,17 @@ router.post('/save-answer', async (req, res, next) => {
         };
 
         const saveHistory = await HealthCheckService.createHistory(attribsHistory);
-        const allRules = attribsHistory.hcHisSystem.rule;
 
-        let hcrResult = '';
-        for (const rule of allRules) {
-            if (rule.hcqType === attribsHistory.hcTypeRule && attribsHistory.hcHisScore >= rule.hcrMin && attribsHistory.hcHisScore <= rule.hcrMax) {
-                hcrResult = rule.hcrResult;
+        //-- find icon persona 
+        let hcrResult = 0;
+        const personaIcons = await HealthCheckService.getAllPersonaIcon();
+        const score = attribsHistory.hcHisScore;
+        for (const icon of personaIcons) {
+            if(attribsHistory.hcTypeRule == icon.iconType && (score >= icon.iconMinScore && score <= icon.iconMaxScore)) {
+                hcrResult = icon.iconLevel;
             }
         }
+        
         const iconData = {
             uuidAccount: account.uuidAccount,
             iconLevel: hcrResult,

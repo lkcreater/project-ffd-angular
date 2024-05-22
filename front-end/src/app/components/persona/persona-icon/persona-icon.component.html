@@ -1,0 +1,16 @@
+<div class="relative">
+    <img [src]="personaIcon" alt="persona" />
+    <div (click)="openModal()" class="absolute bottom-[-10px] right-0 cursor-pointer">
+        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+    </div>
+</div>
+
+<nz-modal
+    [(nzVisible)]="isVisible"
+    (nzOnCancel)="handleCancel()"
+    [nzFooter]="null"
+>
+    <div *nzModalContent>
+        <app-persona-result [persona]="persona" [hiddenFooter]="true" />
+    </div>
+</nz-modal>

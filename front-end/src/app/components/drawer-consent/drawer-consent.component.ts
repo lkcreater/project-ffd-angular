@@ -6,6 +6,7 @@ import {
 } from 'ng-zorro-antd/drawer';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { FormsModule } from '@angular/forms';
+import { HeaderComponent } from '../../layouts/header/header.component';
 
 export interface IContentDrawerConsent {
   value: number;
@@ -22,7 +23,7 @@ export interface IContentDrawerConsent {
 @Component({
   selector: 'app-drawer-consent',
   standalone: true,
-  imports: [NzDrawerModule, NzCheckboxModule, FormsModule],
+  imports: [NzDrawerModule, NzCheckboxModule, FormsModule, HeaderComponent],
   templateUrl: './drawer-consent.component.html',
   styleUrl: './drawer-consent.component.scss',
 })

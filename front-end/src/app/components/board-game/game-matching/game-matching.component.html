@@ -1,0 +1,19 @@
+<app-card-content>
+  <div class="game-matching">
+    <div class="flex justify-end">
+      <div>
+        <app-card-game-timing [startTime]="startTime" />
+      </div>
+    </div>
+
+    <div class="content-game mt-5">
+      @for (item of choices; track $index) {
+        <app-card-matching-game
+            [index]="$index"
+            (onOpen)="actionOpen($event)"
+            [disabled]="isDisabled"
+        />
+      }
+    </div>
+  </div>
+</app-card-content>

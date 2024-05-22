@@ -1,6 +1,11 @@
 <div class="card-health-check-question">
   <div class="subject mb-3">
-    <div class="title">{{ question.hcqSubject }}</div>
+    <div class="title">
+      <span class="font-bold">{{ question.hcqSubject }}</span>
+      @if (isMultipleChoice()) {
+        <br><span class="text-[16px]">(เลือกได้มากกว่า 1 ข้อ)</span>
+      }
+    </div>
 
     <div class="picture">
       @if (getUrl()) {
@@ -9,13 +14,15 @@
     </div>
   </div>
 
-  <div class="answer mt-10 pb-5">
+  <div  class="answer mt-10 pb-5">
     @for (ans of question.answers; track $index) {
     <button
+      #answersChoice
       type="button"
       [id]="'btn-choice-question-' + $index"
-      class="btn-app btn-choice btn-box btn-white w-full mb-3"
-      (click)="actionSelect($event, ans)"
+      [attr.val]="ans.ansScore"
+      class="btn-app btn-white btn-choice btn-box w-full mb-3"
+      (click)="actionSelect($event, ans, $index)"
     >
       {{ ans.ansSubject }}
     </button>

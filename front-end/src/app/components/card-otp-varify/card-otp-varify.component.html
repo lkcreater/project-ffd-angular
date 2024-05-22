@@ -1,16 +1,17 @@
 <p class="text-otp-page">
   รหัสยืนยันตัวตนจะถูกส่งไปทาง{{ label }}ที่ <br />
   {{ displayInput() }}
-  @if(otpObjectRef.code) {
+  @if(otpObjectRef.code && otpIsBlock == false) {
     <br /> Ref: {{ otpObjectRef.code }}
   }
 </p>
 
+@if(otpIsBlock == false && isFirstRenderBlockRequest == false) {
 <div>
   <form nz-form [formGroup]="validateForm">
     <div class="flex gap-2 mt-10">
       @for (item of listOfControl; track $index) {
-      <nz-form-control class="app-input-form">
+      <nz-form-control [class]="{ 'app-input-form': true, '!mb-0': (otpWarningMsg && otpWarningMsg != '')}">
         <nz-form-item>
           <input
             class="otp"
@@ -28,20 +29,51 @@
       }
     </div>
   </form>
-</div>
 
-<div class="text-center">
-  @if (!timeFinished) {
-  <p class="text-otp-page">
-    กรุณารอ {{ timeCountdown }} วินาทีก่อนกดส่งอีกครั้ง
-  </p>
-  } @else {
-  <a
-    href="javascript:void(0);"
-    id="btn-resend-otp"
-    class="a-link"
-    (click)="resendOtp()"
-    >ส่ง OTP อีกครั้ง</a
-  >
+  @if (otpWarningMsg && otpWarningMsg != '') {
+    <nz-alert
+      class="mb-4"
+      nzType="warning"
+      [nzDescription]="otpWarningMsg"
+      nzShowIcon
+    ></nz-alert>
   }
 </div>
+
+    <div class="text-center">
+      @if (!timeFinished) {
+      <p class="text-otp-page">
+        กรุณารอ {{ timeCountdown }} วินาทีก่อนกดส่งอีกครั้ง
+      </p>
+      } @else {
+        @if(otpIsBlockRequest == false) {
+          <a
+            href="javascript:void(0);"
+            id="btn-resend-otp"
+            class="a-link"
+            (click)="resendOtp()"
+            >ส่ง OTP อีกครั้ง</a
+          >
+        } 
+
+        @if (otpRequestMsg && otpRequestMsg != '') {
+          <br><i>{{ otpRequestMsg }}</i>
+        }
+      }
+    </div>
+  
+}
+@else {
+  <nz-alert
+    class="mt-5"
+    nzType="error"
+    [nzDescription]="otpAlertMsg"
+    nzShowIcon
+  ></nz-alert>
+}
+
+<app-modal-alert 
+  [(visible)]="isOpenModal" 
+  [title]="modal.title"
+  [desc]="modal.message"
+/>

@@ -8,7 +8,12 @@ import { en_US, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
 import en from '@angular/common/locales/en';
 import { FormsModule } from '@angular/forms';
-import { HTTP_INTERCEPTORS, HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClientModule,
+  provideHttpClient,
+  withFetch,
+} from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -18,6 +23,7 @@ import { lineChanelReducer } from './stores/line-chanel/line-chanel.reducer';
 import { termConditionReducer } from './stores/term-condition/term-condition.reducer';
 import { configReducer } from './stores/config/config.reducer';
 import { questionnaireReducer } from './stores/questionnaire/questionnaire.reducer';
+import { gameReducer } from './stores/game/game.reducer';
 
 registerLocaleData(en);
 
@@ -36,11 +42,14 @@ export const appConfig: ApplicationConfig = {
       lineChanel: lineChanelReducer,
       termCondition: termConditionReducer,
       config: configReducer,
-      questionnaire: questionnaireReducer
+      questionnaire: questionnaireReducer,
+      game: gameReducer,
     }),
     provideEffects(),
     {
-      provide: HTTP_INTERCEPTORS, useClass: ApiInterceptor, multi: true
-    }
-],
+      provide: HTTP_INTERCEPTORS,
+      useClass: ApiInterceptor,
+      multi: true,
+    },
+  ],
 };

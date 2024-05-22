@@ -3,13 +3,12 @@
     @if(isDisplayPersonal) {
     <app-persona-result [persona]="personal"></app-persona-result>
     } @else {
-    <div class="title flex-col">
-      <h1 class="!text-[40px]">ยินดีด้วย</h1>
-      <h1>คุณตอบคำถามครบแล้ว</h1>
-    </div>
-
     <div class="mt-10">
       <img class="mx-auto h-[300px]" [src]="image" alt="" />
+    </div>
+
+    <div class="title flex-col mt-4">
+      <h1>คุณตอบคำถามครบแล้ว</h1>
     </div>
     }
   </div>

@@ -6,6 +6,7 @@ import {
 } from 'ng-zorro-antd/drawer';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { FormsModule } from '@angular/forms';
+import { HeaderComponent } from '../../layouts/header/header.component';
 
 export interface IContentDrawer {
   value: number;
@@ -21,7 +22,7 @@ export interface IContentDrawer {
 @Component({
   selector: 'app-drawer-term-condition',
   standalone: true,
-  imports: [NzDrawerModule, NzCheckboxModule, FormsModule],
+  imports: [NzDrawerModule, NzCheckboxModule, FormsModule, HeaderComponent],
   templateUrl: './drawer-term-condition.component.html',
   styleUrl: './drawer-term-condition.component.scss',
 })

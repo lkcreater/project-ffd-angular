@@ -10,6 +10,6 @@ export class BcryptHelper {
   }
 
   public static verifyHash(hash: string) {
-    return BcryptHelper.hash(hash + '@true');
+    return BcryptHelper.hash(hash);
   }
 }

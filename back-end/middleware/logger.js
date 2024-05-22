@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const config = {
     ENGINE_NAME: 'FinancialFreedomEngine',
     LOG_TO_CONSOLE: false,
-    LOG_PATH: environment.log?.path || './log'
+    LOG_PATH: environment.log?.path
 };
 const logLevel = environment.log.level;
 let log = console;

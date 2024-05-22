@@ -1,9 +1,10 @@
 <div
-  class="rounded-[10px] cursor-pointer p-3"
-  [style.background-color]="bgColor"
+  class="rounded-t-[20px] cursor-pointer bg-white border-[1.5px] border-[var(--color-primary)]"
   [id]="idName"
+  (click)="goToPage()"
 >
-  <p class="text20-hover-white text-center mb-4">{{ label }}</p>
-
-  <img [src]="icon" alt="logo" class="mx-auto h-[100px]" />
+  <img [src]="icon" alt="logo" class="mx-auto w-[100px] h-[100px] my-4" />
+</div>
+<div class="bg-[var(--color-primary)] rounded-b-[20px] py-2">
+  <p class="text-home-menu text-center">{{ label }}</p>
 </div>

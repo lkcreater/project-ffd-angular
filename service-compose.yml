@@ -18,7 +18,7 @@ services:
       - host_network
   
   nginx:
-    image: nginx:1.25.3
+    image: nginx:stable-alpine
     expose:
       - 80
     ports:

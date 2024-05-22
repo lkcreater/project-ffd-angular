@@ -19,11 +19,11 @@ export class AuthenService {
       IApiResponse<{
         hash: string;
         secretKey: string;
+        status?: string;
       }>
     >(ApiHelper.api('authen'), {
       action: 'FFD_AUTHEN',
       userName,
-      passWord,
     }).pipe(map(res => this.utilsService.handleResponse(res)));
   }
 
@@ -34,7 +34,7 @@ export class AuthenService {
       return of(null);
     }
 
-    const verHash = BcryptHelper.verifyHash(hash);
+    const verHash = BcryptHelper.verifyHash(secretKey);
     return this.http.post<
       IApiResponse<{
         isLineConnect: boolean;
@@ -93,6 +93,54 @@ export class AuthenService {
     }, {
       headers: ApiHelper.header({ token })
     }).pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  getListPwd(token: string) {
+    return this.http.get<
+      IApiResponse<{
+        history: any[];
+      }>
+    >(ApiHelper.api('history-pwd'), {
+      headers: ApiHelper.header({ token })
+    }).pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  saveHistoryAuth(body: {
+    pwdAtHash: string | null;
+    pwdAtInput: string;
+    pwdResult: boolean;
+  }) {
+    return this.http.post<
+      IApiResponse<{
+        FindHistory: any[];
+        PWD_LIMIT_WRONG: number; 
+        PWD_LOCK_DURATION_MINUTES: number;
+      }>
+    >(ApiHelper.api('history-pwd/save-activity'), body).pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  getHistoryAuth(body: {
+    pwdAtInput: string;
+  }) {
+    return this.http.post<
+      IApiResponse<{
+        FindHistory: any[];
+        PWD_LIMIT_WRONG: number; 
+        PWD_LOCK_DURATION_MINUTES: number;
+      }>
+    >(ApiHelper.api('history-pwd/get-activity'), body).pipe(map(res => this.utilsService.handleResponse(res)));
+  }
+
+  lockPwdByUuid(body: {
+    pwdAtHash: string;
+  }) {
+    return this.http.put<
+      IApiResponse<{
+        FindHistory: any[];
+        PWD_LIMIT_WRONG: number; 
+        PWD_LOCK_DURATION_MINUTES: number;
+      }>
+    >(ApiHelper.api('history-pwd/lock-activity'), body).pipe(map(res => this.utilsService.handleResponse(res)));
   }
   
 }

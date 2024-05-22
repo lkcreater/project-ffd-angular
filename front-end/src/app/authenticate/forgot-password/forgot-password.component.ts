@@ -15,6 +15,7 @@ import { CardContentComponent } from '../../components/card-content/card-content
 import { AuthenService } from '../../services/authen/authen.service';
 import { CardOtpVarifyComponent } from '../../components/card-otp-varify/card-otp-varify.component';
 import { InputSetPasswordComponent } from '../../components/inputs/input-set-password/input-set-password.component';
+import { ModalAlertComponent } from '../../components/modal-alert/modal-alert.component';
 
 @Component({
   selector: 'app-forgot-password',
@@ -27,7 +28,8 @@ import { InputSetPasswordComponent } from '../../components/inputs/input-set-pas
     RouterLink,
     CardContentComponent,
     CardOtpVarifyComponent,
-    InputSetPasswordComponent
+    InputSetPasswordComponent,
+    ModalAlertComponent
   ],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.scss',
@@ -51,32 +53,42 @@ export class ForgotPasswordComponent {
     userName: ['', [Validators.required]],
   });
 
+  historyPwds: any[] = [];
+
   stepNext: 'input' | 'otp' | 'password' = 'input';
   inputObject = {
     input: '',
     isExistAlready: true,
     token: '',
-    type: 'EMAIL'
-  }
+    type: 'EMAIL',
+  };
 
   submitForm(): void {
     //-- step input
     if (this.stepNext == 'input') {
       if (this.validateForm.valid && this.validateForm.value.userName) {
-        let input = this.validateForm.value.userName;
-        this.authenService.verifyInput(input).subscribe(res => {
-          if(!res) {
-            this.notification.warning('Error', 'error api validation');
+        let inputData = this.validateForm.value.userName;
+        const input = inputData.toLowerCase();
+        this.authenService.verifyInput(input).subscribe((res) => {
+          const token = res?.token;
+          if(token) {
+            this.authenService.getListPwd(token).subscribe(res => {
+              this.historyPwds = res?.history ?? [];
+            });
           }
 
-          if(res?.isExistAlready == true) {
+          if (res?.isExistAlready == true) {
             this.inputObject = {
               input: input,
-              ...res
-            }
+              ...res,
+            };
             this.stepNext = 'otp';
-          }else{
-            this.notification.warning('แจ้งเตือน', 'บัญชีผู้ใช้ของท่านไม่ถูกต้อง กรุณาตรวจสอบ');
+          } else {
+            this.openModalAlert(
+              'บัญชีผู้ใช้ของท่านไม่ถูกต้อง',
+              'กรุณาใส่ เบอร์โทรศัพท์ / อีเมล ของท่านเพื่อรับขั้นตอน การเปลี่ยนรหัสผ่านใหม่อีกครั้ง'
+            );
+            this.validateForm.reset();
           }
         });
       } else {
@@ -103,29 +115,38 @@ export class ForgotPasswordComponent {
   //-- step OTP
   onOtpSubmit(data: { verify: boolean; secret: string; otp: string }) {
     if (data?.verify == true) {
-      this.stepNext = 'password'
+      this.stepNext = 'password';
     } else {
-      this.notification.warning(
-        'แจ้งเตือน',
-        'การตรวจสอบ OTP ของท่านไม่ถูกต้อง'
+      this.openModalAlert(
+        'รหัส OTP ไม่ถูกต้อง',
+        'กรุณากรอกรหัส OTP ใหม่อีกครั้ง'
       );
     }
   }
 
   //-- step new password
-  onNewPassword(data: { password: string; confirmPassword: string; hash: string }) {
-    if(!this.inputObject.token) {
-      this.notification.warning(
-        'แจ้งเตือน',
-        'ระบบเกิดข้อผิดพลาด'
-      );
-    }
+  onNewPassword(data: {
+    password: string;
+    confirmPassword: string;
+    hash: string;
+  }) {
+    this.authenService
+      .forgotPassword(this.inputObject.token, data.hash)
+      .subscribe((res) => {
+        if (res) {
+          this.router.navigate(['/auth']);
+        }
+      });
+  }
 
-    this.authenService.forgotPassword(this.inputObject.token, data.hash).subscribe(res => {
-      console.log(res);
-      if(res) {
-        this.router.navigate(['/auth']);
-      }
-    })
+  isOpenModal: boolean = false;
+  modal = {
+    title: '',
+    message: ''
+  }
+  openModalAlert(title: string, message: string) {
+    this.isOpenModal = true;
+    this.modal.title = title;
+    this.modal.message = message;
   }
 }

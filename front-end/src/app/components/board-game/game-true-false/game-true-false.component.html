@@ -1,0 +1,37 @@
+<app-card-content>
+  <div class="app-game">
+    <div class="flex justify-end">
+      <div>
+        <app-card-game-timing [startTime]="startTime" />
+      </div>
+    </div>
+    <div class="question" [class.active]="isRun">
+      <div class="text-center text-[26px] text-[var(--color-primary)] mt-10">
+        <p>{{ question.gmQuestTitle }}</p>
+        <p>{{ currentCount }}/{{ totalCount }}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4" [class.choice-answer]="showAnswer">
+        @for (item of choices; track $index) {
+        <app-card-board-game
+          [disabled]="showAnswer"
+          [answer]="item"
+          (onChoose)="chooseAnswer($event)"
+        />
+        }
+      </div>
+    </div>
+
+    <div class="mt-8 answer-explain" [class.active]="showAnswer">
+      <app-card-explain [title]="answerTitle" [explain]="answerExplain" />
+      <div class="mt-8">
+        <button
+          type="button"
+          class="btn-app btn-primary w-full lg:w-3/12 mx-auto"
+          (click)="submitAnswer()"
+        >
+          ต่อไป
+        </button>
+      </div>
+    </div>
+  </div>
+</app-card-content>

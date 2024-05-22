@@ -1,5 +1,5 @@
 const multer = require("multer");
-
+const env = require('../configuration');
 const MIME_TYPE_IMAGE = ["image/gif", "image/jpeg", "image/png"];
 const MIME_TYPE_DOCUMENT = ["application/pdf"];
 
@@ -21,7 +21,7 @@ const queryMimeType = (type) => {
 };
 
 const settingMulter = (options) => {
-  const fileSize = options?.fileSize ?? 5 * 1024 * 1024; //-- 5MB
+  const fileSize = options?.fileSize ?? env.OBS_FILE_SIZE; //-- 5MB
   const allowMimeTypes = queryMimeType(options?.allowMimeTypes ?? "all");
   return multer({
     storage: multer.memoryStorage(),

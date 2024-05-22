@@ -1,0 +1,28 @@
+<app-card-content>
+  <p class="text-center text-[30px] font-bold text-[var(--color-primary)] my-8">
+    @if (detail && detail.format) {
+    {{ detail.format.gmFormName }}
+    }
+  </p>
+  <div class="flex justify-center">
+    <div class="w-[390px]">
+      <app-card-intro-game
+        [openDetail]="true"
+        [dataBoard]="detail"
+      ></app-card-intro-game>
+    </div>
+  </div>
+
+  <div class="mt-10">
+    <div class="display-footer">
+      <button
+        id="btn-start-game"
+        type="button"
+        class="btn-app btn-primary w-full"
+        (click)="startGame()"
+      >
+        <span>เริ่มเกม</span>
+      </button>
+    </div>
+  </div>
+</app-card-content>

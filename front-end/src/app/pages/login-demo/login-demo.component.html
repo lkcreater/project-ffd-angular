@@ -1,0 +1,47 @@
+<app-card-content [hiddenMenu]="true">
+  <div class="display">
+    <div class="text-center mb-9">
+      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon" />
+    </div>
+
+    <div class="title">ลงชื่อเข้าใช้งาน</div>
+    <p class="text-otp-page mb-7">
+      ตัวอย่างในการตั้งชื่อผู้ใช้ <br />
+      Ex. john.company
+    </p>
+
+    <form nz-form nzLayout="vertical" [formGroup]="validateForm">
+      <nz-form-item class="app-input-form">
+        <nz-form-label>ชื่อผู้ใช้ </nz-form-label>
+        <nz-form-control [nzErrorTip]="validateMsgTemplate">
+          <input
+            nz-input
+            id="input-userName"
+            type="text"
+            formControlName="userName"
+            [placeholder]="'กรอกชื่อผู้ใช้'"
+            class="w-full"
+            maxlength="50"
+          />
+        </nz-form-control>
+        <ng-template #validateMsgTemplate let-controlPassword>
+          @if (controlPassword.errors) {
+          {{ controlPassword.errors?.['message'] }}
+          }
+        </ng-template>
+      </nz-form-item>
+    </form>
+  </div>
+  <div footer>
+    <div class="display-footer">
+      <button
+        id="btn-next-register"
+        type="button"
+        class="btn-app btn-primary w-full"
+        (click)="submitNextForm()"
+      >
+        <span>ถัดไป</span>
+      </button>
+    </div>
+  </div>
+</app-card-content>

@@ -14,6 +14,7 @@ class HealthCheckService {
             queryBuilder.where('question.active = true and answer.active = true');
             queryBuilder.andWhere('question.hcGroupUuid = :hcGroupUuid', { hcGroupUuid });
             queryBuilder.orderBy('question.order', 'ASC');
+            queryBuilder.addOrderBy('answer.order', 'ASC');
             const questions = await queryBuilder.getMany();
             return questions;
         } catch (error) {
@@ -139,7 +140,7 @@ class HealthCheckService {
     //-----------------------------------------------------------
     async getAllPersonaIcon() {
         try {
-            const personaBuilder = db.connection.getRepository('SysPersonaIcon').createQueryBuilder();
+            const personaBuilder = db.connection.getRepository('SysPersonaIcon').createQueryBuilder().orderBy('icon_level', 'ASC');
             const personaIcon = await personaBuilder.getMany();
             return personaIcon;
         } catch (error) {

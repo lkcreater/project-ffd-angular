@@ -3,7 +3,7 @@ const { default: axios } = require("axios");
 const { ELoginPlatform } = require("./authen.service");
 const env = require('../configuration');
 const LOGGER = require('../middleware/logger');
-const constrant = require('../commons/constrant');
+
 const config = {
     host_api: env.FFD_API_HOST,
     user_id: env.FFD_API_USER_ID,
@@ -17,8 +17,10 @@ const config = {
     x_channel_id: env.FFD_X_CHANNEL_ID,
     reference_name: env.FFD_REFERENCE_NAME,
     policy_name: env.FFD_OTP_POLICY_NAME,
-    templateId : { sms: env.FFD_OTP_TEMPLATE_ID_SMS, email: env.FFD_OTP_TEMPLATE_ID_EMAIL },
-    notiType : { sms: env.FFD_OTP_NOTITYPE_SMS, email: env.FFD_OTP_NOTITYPE_EMAIL}
+    templateId: { sms: env.FFD_OTP_TEMPLATE_ID_SMS, email: env.FFD_OTP_TEMPLATE_ID_EMAIL },
+    notiType: { sms: env.FFD_OTP_NOTITYPE_SMS, email: env.FFD_OTP_NOTITYPE_EMAIL },
+    data_controller: env.FFD_DATA_CONTROLLER,
+    data_processor: env.FFD_DATA_PROCESSOR,
 }
 
 class TiscoApiService {
@@ -30,7 +32,7 @@ class TiscoApiService {
         pac: '37ABE',
         token_uuid: '1111111-2222-3333-4444-abcdef789012',
         test_phone: '023',
-        test_email: '3wJVRPHoGA',
+        test_email: '3wjvrphoga',
         test_otp: '329759',
     };
 
@@ -41,7 +43,7 @@ class TiscoApiService {
             request_datetime: new Date().toLocaleString(),
             log_session_id: logSessionId,
             sub_state: '',
-            app_code: config.x_channel_id,
+            app_code: env.APPLICATION_CODE,
             ip: '',
         };
         return {
@@ -53,16 +55,16 @@ class TiscoApiService {
         };
     }
 
-    async getVersionConsentTisco(idNo, passwordNo, business_consent_group = 1, execution_application = 274, req) {
+    async getVersionConsentTisco(uuidAccount, business_consent_group = 1, execution_application = 274, req) {
+
         try {
             const url = `${this._urlConsent}checkConsentAcceptanceMaster`;
             const body = {
-                id_no: idNo,
-                password_no: passwordNo,
+                id_no: uuidAccount,
                 business_consent_group: business_consent_group,
                 execution_application: execution_application,
-                data_controller: [],
-                data_processor: [],
+                data_controller: [config.data_controller],
+                data_processor: [config.data_processor],
             };
             const res = await axios.post(url, body, { headers: this.headerConfig(req.sessionId) });
             if (res.status == 200) {
@@ -97,28 +99,22 @@ class TiscoApiService {
         }
     }
 
-    async saveMember(account, accountLine, consent, adapterLine, req) {
+    async saveMember(account, accountLine, consent, req) {
         try {
             const url = `${this._urlConsent}createUpdateConsentAcceptanceTransaction`;
             const body = {
-                id_no: `${adapterLine.idNo}`,
-                passport_no: `${adapterLine.passwordNo}`,
+                id_no: `${account.uuidAccount}`,
                 cust_type: 1,
                 first_name: `${account.accFirstname}`,
-                middle_name: '',
                 last_name: `${account.accLastname}`,
                 execution_application: consent.ffdExecutionApplication,
-                data_processor: '',
-                data_controller: '',
-                sub_controller: '',
-                app_data_code: '',
-                app_ref_no: '',
+                data_processor: config.data_processor,
+                data_controller: config.data_controller,
                 consent_id: consent.ffdTargetConsentId,
                 consent_code: `${consent.ffdTargetConsentCode}`,
                 consent_version: `${consent.ffdTargetConsentVersion}`,
                 accept_status: accountLine.acceptStatus,
                 product_type: consent.ffdTargetProductType,
-                consent_ref: '',
                 consent_date: 0,
                 expiry_date: 0
             };

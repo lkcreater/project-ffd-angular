@@ -20,7 +20,7 @@ router.get('/', async (req, res, next) => {
 
         const content = await ContentService.getContent();
         if (content == '') {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.consentNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.contentNotFound);
         }
 
         RESPONSE.success(res, SESSION_ID, content, messages.success.getContentSuccess);

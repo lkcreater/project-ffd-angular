@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChildren } from '@angular/core';
 import * as _ from 'lodash';
 import {
   IQuestionAnswer,
@@ -15,8 +15,12 @@ import { UploadService } from '../../services/upload/upload.service';
   styleUrl: './card-health-check-question.component.scss',
 })
 export class CardHealthCheckQuestionComponent {
+  @ViewChildren('answersChoice') answersChoice!: ElementRef[];
+
+  @Input({ required: true }) questionIndex!: number;
   @Input({ required: true }) question!: IRootQuestion;
   @Output() onChange = new EventEmitter<{
+    nextStep: boolean;
     isValid: boolean;
     hcqId: number;
     hcqSubject: string;
@@ -39,12 +43,20 @@ export class CardHealthCheckQuestionComponent {
   }
 
   isValid: boolean = false;
+  nextStep: boolean = false;
   chooseChoice: IQuestionAnswer[] = [];
 
-  actionSelect($event: any, answer: IQuestionAnswer) {
+  isMultipleChoice() {
+    if(this.question.hcqOptions.rule == 'multiChoice') {
+      return true;
+    }
+    return false;
+  }
+
+  actionSelect($event: any, answer: IQuestionAnswer, index: number) {
     const event = $event?.srcElement.classList as DOMTokenList;
     if (this.question.hcqOptions?.rule == 'oneChoice') {
-      this.actionOneChoice(event, answer);
+      this.actionOneChoice(event, answer, index);
     }
 
     if (this.question.hcqOptions?.rule == 'multiChoice') {
@@ -70,6 +82,7 @@ export class CardHealthCheckQuestionComponent {
     });
 
     this.onChange.emit({
+      nextStep: this.nextStep,
       isValid: this.isValid,
       hcqId: this.question.hcqId,
       hcqSubject: this.question.hcqSubject,
@@ -79,22 +92,21 @@ export class CardHealthCheckQuestionComponent {
     });
   }
 
-  actionOneChoice(event: DOMTokenList, answer: IQuestionAnswer) {
-    if (event.contains('btn-white')) {
-      if (this.chooseChoice.length > 0) {
-        this._onWarnning('เลือกคำตอบได้ข้อเดียวเท่านั้น');
-        return;
+  actionOneChoice(event: DOMTokenList, answer: IQuestionAnswer, index: number) {
+
+    this.answersChoice.forEach((itemChoice, idx) => {
+      if(index == idx) {
+        this.chooseChoice = [];
+        itemChoice.nativeElement.classList.remove('btn-white');
+        itemChoice.nativeElement.classList.add('btn-primary');
+        this.chooseChoice.push(answer);
+        this.isValid = true;
+        this.nextStep = true;
+      }else {
+        itemChoice.nativeElement.classList.remove('btn-primary'); 
+        itemChoice.nativeElement.classList.add('btn-white');
       }
-      event.remove('btn-white');
-      event.add('btn-primary');
-      this.chooseChoice.push(answer);
-      this.isValid = true;
-    } else {
-      event.remove('btn-primary');
-      event.add('btn-white');
-      this.chooseChoice = [];
-      this.isValid = false;
-    }
+    });
 
     this.submit();
   }

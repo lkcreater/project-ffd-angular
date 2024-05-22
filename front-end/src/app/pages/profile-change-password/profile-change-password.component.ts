@@ -9,6 +9,7 @@ import { InputSetPasswordComponent } from '../../components/inputs/input-set-pas
 import { UserInfoService } from '../../services/user-info/user-info.service';
 import { ProfileService } from '../../services/profile/profile.service';
 import { IInfoProfile } from '../../stores/user-info/user-info.actions';
+import { AuthenService } from '../../services/authen/authen.service';
 
 interface IStateObjectChangePassword {
   type: TChanelAuthen;
@@ -39,6 +40,7 @@ export class ProfileChangePasswordComponent implements OnInit {
     private router: Router,
     private userInfoService: UserInfoService,
     private profileService: ProfileService,
+    private authenService: AuthenService,
   ) {
     if (isPlatformBrowser(this.platformId)) {
       this.stateObject = this.router.getCurrentNavigation()?.extras.state as IStateObjectChangePassword;
@@ -59,11 +61,17 @@ export class ProfileChangePasswordComponent implements OnInit {
       this.inputObject.input = this.stateObject.input;
       this.inputObject.type = this.stateObject.type;
       this.inputObject.token = this._token;
+
+      this.authenService.getListPwd(this._token).subscribe(res => {
+        this.historyPwds = res?.history ?? [];
+      });
     }
   }
 
   //-- private state 
   _token!: string | null;
+
+  historyPwds: any[] = [];
 
   //-- public state
   stateObject!: IStateObjectChangePassword;

@@ -1,52 +1,52 @@
-<div class="h-dvh overflow-hidden flex items-end justify-center">
-  <div>
-    <app-card-container [isHiddenHeader]="true">
-      <div class="flex justify-center">
-        <img [src]="imgSrc"  />
+<app-header [hiddenMenu]="true" [marginBottom]="false"/>
+<div class="h-[calc(100dvh-101px)] home-page-welcome">
+  <div class="container mx-auto pt-8 h-full grid content-between">
+    <div>
+      <h3 class="text-center text-white text-[20px]">
+        ยินดีต้อนรับเข้าสู่ Freedom by TISCO
+      </h3>
+
+      <h1 class="text-center text-white text-[30px] font-bold mt-4">
+        ค้นหาตัวตน พร้อมเรียนรู้ <br> เรื่องการเงิน
+      </h1>
+
+      <div class="mt-5">
+        <img class="mx-auto h-[100px]" [src]="imgFfd" alt="">
       </div>
-    </app-card-container>
-    <div
-      class="relative w-full h-[180px] overflow-hidden lg:-mt-36 md:-mt-40 sm:-mt-44 xs:-mt-28"
-    >
-      <div
-        class="absolute left-1/2 transform -translate-x-1/2 w-[1200px] h-[400px] bg-[#005DA5] rounded-[50%]"
+
+      <div class="mt-5">
+        <img class="mx-auto h-[250px]" [src]="imgLogo" alt="">
+      </div>
+    </div>
+
+    <div class="flex gap-4 justify-center pb-7">
+      @if (isDemo) {
+        <button
+        id="btn-welcome-signin"
+        type="button"
+        class="btn-app btn-primary lg:w-4/12 w-10/12"
+        (click)="routerSendObject(['/auth/sign-in'])"
       >
-        <div class="w-full">
-          <div class="flex flex-col justify-center items-center">
-            <div
-              class="flex flex-row justify-center items-center w-4/12 my-5 gap-2"
-            >
-              <button
-                id="btn-welcome-signin"
-                type="button"
-                class="btn-decline-consent w-full"
-                [routerLink]="['/auth/sign-in']"
-              >
-                <div class="flex gap-2 justify-center">
-                  <span class="text-decline-consent w-full">เข้าสู่ระบบ</span>
-                </div>
-              </button>
-              <button
-                id="btn-welcome-signup"
-                type="button"
-                class="btn-accept-consent border-2 border-white hover:border-white hover:border-2 w-full"
-                [routerLink]="['/auth/chanel']"
-              >
-                <div class="flex gap-2 justify-center w-full">
-                  <span class="flex text-accept-consent w-full">ลงทะเบียน</span>
-                  <span class="flex flex-col justify-center"
-                    ><img
-                      src="assets/btn-logo/next-btn.svg"
-                      width="23px"
-                      height="12px"
-                      alt="logo"
-                  /></span>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        เข้าสู่ระบบ
+      </button>
+      } @else {
+      <button
+        id="btn-welcome-signin"
+        type="button"
+        class="btn-app btn-gray w-6/12 lg:w-2/12"
+        (click)="routerSendObject(['/auth/sign-in'])"
+      >
+        เข้าสู่ระบบ
+      </button>
+      <button
+        id="btn-welcome-signup"
+        type="button"
+        class="btn-app btn-primary w-6/12 lg:w-2/12"
+        (click)="routerSendObject(['/auth/chanel'], { path: ['/'] })"
+      >
+        ลงทะเบียน
+      </button>
+    }
     </div>
   </div>
 </div>

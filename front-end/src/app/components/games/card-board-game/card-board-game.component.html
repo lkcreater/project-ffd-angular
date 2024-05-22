@@ -1,12 +1,21 @@
-<div class="game-true-false is-false">
-  <div class="overlay">
-    <span nz-icon nzType="check" nzTheme="outline" class="icon-game yes"></span>
-    <span nz-icon nzType="close" nzTheme="outline" class="icon-game no"></span>
-  </div>
+<div class="game-true-false" [class.is-select]="isSelected" (click)="actionChoose()">
+    @if(answer.gmAnsChoice.result == true) {
+      <div class="overlay yes">
+        <img class="icon-game" [src]="imageIsTrue" >
+      </div>
+    }
+    
+    @if(answer.gmAnsChoice.result == false) {
+      <div class="overlay no">
+        <img class="icon-game" [src]="imageIsFalse" >
+      </div>
+    }
   <div class="header">
-    <img src="assets/games/game_banner_1.svg" alt="game-banner" />
+    @if(getUrlImage()) {
+      <img class="h-[120px]" [src]="getUrlImage()" alt="game-banner" />
+    }
   </div>
   <div class="body">
-    <p class="text-game">ขอขยายเวลา การจ่าย ชำระหนี้</p>
+    <p class="text-game">{{ answer.gmAnsChoice.choice }}</p>
   </div>
 </div>

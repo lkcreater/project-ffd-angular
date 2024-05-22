@@ -38,14 +38,17 @@ export class CardAvatarComponent {
           .subscribe((res) => {
             this.loading = false;
             this.avatar = url;
-            this.userInfoService.updateProfile(this.token, {
-              accPicture: res?.file
-            }).subscribe((save) => {
-              this.onUploaded.emit({
-                file: file[0],
-                preview: url,
+            this.userInfoService
+              .updateProfile(this.token, {
+                accPicture: res?.file,
+              })
+              .subscribe((save) => {
+                this.userInfoService.fetchUserInfo().subscribe();
+                this.onUploaded.emit({
+                  file: file[0],
+                  preview: url,
+                });
               });
-            });
           });
       } else {
         this.loading = false;

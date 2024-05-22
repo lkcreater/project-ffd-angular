@@ -1,70 +1,74 @@
 <app-card-content [hiddenMenu]="true">
-    <div class="display">
-      <!-- <div class="text-center mb-9">
+  <div class="display">
+    <!-- <div class="text-center mb-9">
         <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon">
       </div> -->
-  
-      <!-- step input -->
-      @if(stepNext == 'input') {
-      <div class="title mb-7">เชื่อมต่อบัญชีด้วย{{ label }}</div>
-      <form nz-form nzLayout="vertical" [formGroup]="validateForm">
-        <nz-form-item class="app-input-form">
-          <nz-form-label>{{ label }}</nz-form-label>
-          <nz-form-control [nzErrorTip]="'กรุณากรอก ' + label">
-            <input
-              nz-input
-              id="input-userName"
-              type="text"
-              formControlName="userName"
-              [placeholder]="'กรอก' + label"
-              class="w-full"
-              [maxlength]="type == 'PHONE' ? 10 : 255"
-            />
-          </nz-form-control>
-        </nz-form-item>
-      </form>
-      }
-  
-      <!-- step otp -->
-      @if(stepNext == 'otp') {
-        <div class="title">ยืนยันตัวตน</div>
-        <app-card-otp-varify
-          [token]="inputObject.token"
-          [type]="inputObject.type"
-          [input]="inputObject.input"
-          (onSubmit)="onOtpSubmit($event)"
-        />
-      }
-  
-      <!-- step password -->
-      @if(stepNext == 'password') {
-      <div class="title mb-7">ตั้งรหัสผ่าน</div>
-      <app-input-set-password (onValid)="onNewPassword($event)" />
-      }
-  
-      <!-- step success -->
-      @if(stepNext == 'success') {
-        <div class="items-center pt-28">
-          <img [src]="successImage" class="w-44 h-44 mx-auto" /> 
-          <div class="title mt-7 text-center">การเชื่อมต่อบัญชีของท่านสำเร็จ</div>
-        </div>
-      }
-    </div>
-  
-    @if(stepNext != 'success') {
-      <div footer>
-        <div class="display-footer">
-          <button
-            id="btn-next-register"
-            type="button"
-            class="btn-app btn-primary w-full"
-            (click)="submitNextForm()"
-          >
-            <span>ถัดไป</span>
-          </button>
-        </div>
-      </div>
+
+    <!-- step input -->
+    @if(stepNext == 'input') {
+    <div class="title mb-7">เชื่อมต่อบัญชีด้วย{{ label }}</div>
+    <form nz-form nzLayout="vertical" [formGroup]="validateForm">
+      <nz-form-item class="app-input-form">
+        <nz-form-label>{{ label }}</nz-form-label>
+        <nz-form-control [nzErrorTip]="validateMsgTemplate">
+          <input
+            nz-input
+            id="input-userName"
+            type="text"
+            formControlName="userName"
+            [placeholder]="'กรอก' + label"
+            class="w-full"
+            [maxlength]="type == 'PHONE' ? 10 : 255"
+          />
+        </nz-form-control>
+        <ng-template #validateMsgTemplate let-controlPassword>
+          @if (controlPassword.errors) {
+          {{ controlPassword.errors?.['message'] }}
+          }
+        </ng-template>
+      </nz-form-item>
+    </form>
     }
-  </app-card-content>
-  
-  
+
+    <!-- step otp -->
+    @if(stepNext == 'otp') {
+    <div class="title">ยืนยันตัวตน</div>
+    <app-card-otp-varify
+      typeOtp="PROFILE_NEW_PASSWORD"
+      [token]="inputObject.token"
+      [type]="inputObject.type"
+      [input]="inputObject.input"
+      (onSubmit)="onOtpSubmit($event)"
+    />
+    }
+
+    <!-- step password -->
+    @if(stepNext == 'password') {
+    <div class="title mb-7">ตั้งรหัสผ่าน</div>
+    <app-input-set-password (onValid)="onNewPassword($event)" />
+    }
+
+    <!-- step success -->
+    @if(stepNext == 'success') {
+    <div class="items-center pt-28">
+      <img [src]="successImage" class="w-44 h-44 mx-auto" />
+      <div class="title mt-7 text-center">การเชื่อมต่อบัญชีของท่านสำเร็จ</div>
+    </div>
+    }
+  </div>
+
+  @if(stepNext != 'success') {
+  <div footer>
+    <div class="display-footer">
+      <button
+        id="btn-next-register"
+        type="button"
+        class="btn-app btn-primary w-full"
+        (click)="submitNextForm()"
+      >
+        <span>ถัดไป</span>
+      </button>
+    </div>
+  </div>
+  }
+</app-card-content>

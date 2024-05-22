@@ -21,7 +21,7 @@ export class CardHealthCheckConfirmComponent implements OnInit {
 
   personal!: IPeronaIcon;
   isDisplayPersonal: boolean = false;
-  image = './assets/question/success.png';
+  image = './assets/question/welcom-hc-complete.png';
 
   ngOnInit(): void {
     this.userInfoService.fetchUserInfo().subscribe((res) => {

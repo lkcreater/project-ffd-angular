@@ -29,7 +29,7 @@ router.post('/version', async (req, res, next) => {
         //-- check connect line account
         const accountLine = await AccountsService.getConnectLine(req.authen.uuid);
         if (!accountLine) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountIsNotConnect);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountIsNotConnect);
         }
 
         //-- get adapter LINE
@@ -43,8 +43,7 @@ router.post('/version', async (req, res, next) => {
 
         //-- check version consent by tisco
         const tiscoConsent = await TiscoApiService.getVersionConsentTisco(
-            adapterLine.idNo,
-            adapterLine.passwordNo,
+            accountLine.uuidAccount,
             adapterLine.ffdBusinessConsentGroup,
             adapterLine.ffdExecutionApplication,
             req
@@ -67,7 +66,7 @@ router.post('/version', async (req, res, next) => {
             }
 
             if (!consent) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.updateConsent);
+                return RESPONSE.exception(res, SESSION_ID, messages.errors.updateConsent);
             }
 
             //-- ยังไม่เคยกด
@@ -116,7 +115,7 @@ router.get('/get-consent', async (req, res, next) => {
         //-- check connect line account
         const accountLine = await AccountsService.getConnectLine(req.authen.uuid);
         if (!accountLine) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.cAccountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.cAccountNotFound);
         }
 
         //-- get adapter LINE
@@ -157,7 +156,7 @@ router.post('/save-consent', async (req, res, next) => {
         //-- check connect line account
         const accountLine = await AccountsService.getConnectLine(uuid);
         if (!accountLine) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountIsNotConnect);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountIsNotConnect);
         }
 
         //-- save consent by LINE account
@@ -168,7 +167,7 @@ router.post('/save-consent', async (req, res, next) => {
         //***************************************** */
         const account = await AccountsService.findAccount(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         //-- get adapter LINE
@@ -176,7 +175,7 @@ router.post('/save-consent', async (req, res, next) => {
         const adapterLine = await LineChanelService.getAdapterLine(code);
 
         if (!adapterLine) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.adapterLineNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.adapterLineNotFound);
         }
         //-- get consent
         const consent = await ConsentService.getConsentByApp(
@@ -184,11 +183,11 @@ router.post('/save-consent', async (req, res, next) => {
             adapterLine.ffdExecutionApplication
         );
         if (!consent) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.consentNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.consentNotFound);
         }
 
         // save Member to tisco
-        const saveMember = await TiscoApiService.saveMember(account, accountLine, consent, adapterLine, req);
+        const saveMember = await TiscoApiService.saveMember(account, accountLine, consent, req);
 
         //กรณียินยอม หา PVD จาก Tisco
         if (req.body.option == 1) {

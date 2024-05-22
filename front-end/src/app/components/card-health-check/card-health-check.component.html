@@ -10,6 +10,7 @@
     <div class="question">
       @for (question of questionInitail; track $index) {
       <app-card-health-check-question
+        [questionIndex]="$index"
         (onChange)="getChooseChoice($event, $index)"
         [question]="question"
         [class]="{
@@ -20,25 +21,37 @@
     </div>
   </div>
 
-  <div footer class="flex justify-center gap-2 pb-8 bg-white">
-    @if (index > 0) {
-    <button
-      type="button"
-      id="btn-question-prev"
-      class="btn-app btn-gray w-full lg:w-2/12"
-      (click)="btnPrevStep()"
-    >
-      ย้อนกลับ
-    </button>
+  <div footer class="flex gap-2 pb-7 pt-1 justify-center bg-white relative h-[84px]">
+    @if (index > 0 && index != indexCheckPoint) {
+      <!-- <button
+        type="button"
+        id="btn-question-prev"
+        class="btn-app btn-gray w-full lg:w-2/12"
+        (click)="btnPrevStep()"
+      >
+        ย้อนกลับ
+      </button> -->
+      <button
+        type="button"
+        id="btn-question-prev"
+        class="absolute top-0 left-0 mt-2"
+        (click)="btnPrevStep()"
+      >
+        <img class="w-[45px]" [src]="imgBtnPrevUri" alt="prev btn">
+      </button>
     }
-    <button
-      type="button"
-      id="btn-question-next"
-      class="btn-app btn-primary w-full lg:w-2/12"
-      (click)="btnNextStep()"
-    >
-      ถัดไป
-    </button>
+
+    @if (isShowBtnNext) {
+      <button
+        type="button"
+        id="btn-question-next"
+        class="btn-app btn-gray w-6/12 justify-center"
+        (click)="btnNextStep()"
+      >
+        ถัดไป
+      </button>
+    }
+
   </div>
 </app-card-content>
 }

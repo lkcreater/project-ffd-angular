@@ -1,0 +1,78 @@
+// game true false
+.game-true-false{
+    @apply overflow-hidden rounded-[20px] relative cursor-pointer;
+  
+    .overlay{
+      @apply absolute w-full h-full text-center;
+  
+      .icon-game{
+        @apply absolute hidden bottom-10 left-1/2 transform -translate-x-1/2;
+      }
+    }
+  
+    .header{
+      @apply overflow-hidden bg-[var(--color-gray-primary)] h-[140px] bg-[url('./assets/logo/logo-ffd.svg')] bg-no-repeat bg-center;
+  
+      img{
+        @apply w-full min-h-[140px];
+      }
+    }
+    .body{
+      @apply p-4 bg-[#005DA5] h-[180px];
+
+      .text-game{
+        @apply font-bold text-[20px] text-white text-center
+      }
+    }
+    
+  }
+  .game-explain{
+    @apply border rounded-[20px] p-4 text-center;
+    .title{
+      @apply text-[#005DA5] text-[15px] font-bold my-2;
+    }
+    .desc{
+      @apply text-center
+    }
+  }
+
+
+//-- game matching
+.game-matching {
+
+    .content-game {
+      @apply grid gap-4 grid-cols-3 lg:grid-cols-4;
+  
+      .card-g-matching {
+        @apply bg-transparent cursor-pointer;
+        perspective: 1000px;
+  
+        &.open {
+          .inner {
+            transform: rotateY(180deg);
+          }
+        }
+  
+        .inner {
+          @apply relative w-full h-full text-center;
+          transition: transform 0.8s;
+          transform-style: preserve-3d;
+        }
+  
+        .box-front, .box-back {
+          @apply absolute w-full h-full;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+        }
+  
+        .box-front {
+          @apply rounded-xl bg-[var(--color-card-g-matching)] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.25)];
+        }
+        
+        .box-back {
+          @apply rounded-xl bg-white border-2 border-[var(--color-border)] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.25)];
+          transform: rotateY(180deg);
+        }
+      }
+    }
+  }

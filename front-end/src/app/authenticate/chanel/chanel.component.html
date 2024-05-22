@@ -6,11 +6,11 @@
     <div class="grid grid-cols-1 gap-5">
       <!-- btn line -->
       @for (line of lineProvider; track $index) {
-        <app-btn-line-login
-          nz-row
-          [id]="'btn-line-login-' + $index"
-          [line]="line"
-        />
+      <app-btn-line-login
+        nz-row
+        [id]="'btn-line-login-' + $index"
+        [line]="line"
+      />
       }
 
       <!-- btn email -->
@@ -43,7 +43,7 @@
         id="btn-submit"
         type="button"
         class="btn-app btn-gray w-full"
-        [routerLink]="['/auth/sign-in']"
+        [routerLink]="pathBack"
       >
         <img src="assets/btn-logo/back-btn.svg" alt="logo" />
         <span> ย้อนกลับ</span>

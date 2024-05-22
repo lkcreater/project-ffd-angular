@@ -3,8 +3,10 @@ const db = require("../commons/typeorm");
 const { DateTz } = require("../helpers/date-tz.helper");
 const { ELoginPlatform, ELoginStatus } = require("./authen.service");
 const { HistoryPwdService } = require("./history-pwd.service");
+const env = require('../configuration');
 
 const LOGGER = require('../middleware/logger');
+const historyPwdService = require("./history-pwd.service");
 
 class AccountsService {
   setPicture(picture) {
@@ -166,6 +168,23 @@ class AccountsService {
     }
   }
 
+  async lockPassword(loginId) {
+    try {
+      //-- update password
+      return await db.connection.getRepository("CmsLogin").update(
+        {
+          id: loginId,
+        },
+        {
+          status: ELoginStatus.LOCK_PWD,
+        }
+      );
+    } catch (error) {
+      LOGGER.error(error);
+      throw new Error(error?.message);
+    }
+  }
+
   async clearPasswordByID(id, username) {
     return await this.updateAccountById(id, {
       accPassword: null,
@@ -237,6 +256,20 @@ class AccountsService {
         }
       );
 
+      if(result) {
+        await db.connection.getRepository("CmsLogin").update(
+          {
+            uuidAccount: uuid,
+          },
+          {
+            status: ELoginStatus.DONE,
+          }
+        );
+
+        //-- clear history log
+        await HistoryPwdService.clearActivityAuthenPwdByHash(uuid);
+      }
+
       //-- save history PWD
       await HistoryPwdService.saveHistoryPwd(uuid, body);
 
@@ -261,6 +294,115 @@ class AccountsService {
     } catch (error) {
       LOGGER.error(error);
       throw new HttpException(error.message, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async createHistory(attribsHistory) {
+    try {
+      const otpHistoryRepository = db.connection.getRepository('SysOtpHistory');
+      const newOtpHistory = otpHistoryRepository.create(attribsHistory);
+      const timeDuration = env.FFD_OTP_BLOCK_DURATION_MINUTES;
+      
+      await db.connection.getRepository('SysOtpHistory')
+        .createQueryBuilder()
+        .insert()
+        .values({
+          ...attribsHistory,
+          otpHisTime: () => `NOW() + interval '${timeDuration} minutes'`
+        })
+        .execute();
+
+      //-- update history old
+      await db.connection.getRepository('SysOtpHistory')
+      .createQueryBuilder()
+      .update()
+      .set({
+        otpHisTime: () => `NOW() + interval '${timeDuration} minutes'`
+      })
+      .where('active = true AND otp_his_action = :otpHisAction AND otp_his_type = :otpHisType AND otp_his_input = :otpHisInput', 
+      { 
+        otpHisAction: attribsHistory.otpHisAction, 
+        otpHisType: attribsHistory.otpHisType,
+        otpHisInput: attribsHistory.otpHisInput,
+        //otpHisSecret: attribsHistory.otpHisSecret
+      })
+      .execute();
+
+      //-- verify otp pass
+      if(attribsHistory?.otpHisIsValid == true) {
+        await db.connection.getRepository('SysOtpHistory')
+        .createQueryBuilder()
+        .delete() //.update().set({ active: false })
+        .where('active = true AND otp_his_type = :otpHisType AND otp_his_input = :otpHisInput', 
+        { 
+          otpHisType: attribsHistory.otpHisType,
+          otpHisInput: attribsHistory.otpHisInput,
+        })
+        .execute();
+      }
+
+      return newOtpHistory;
+    } catch (error) {
+      LOGGER.error(error);
+      throw new Error(error?.message);
+    }
+  }
+
+  async FindHistoryOtp(attribsHistory, isAll = false) {
+    try {
+      const otpHisAction = attribsHistory.otpHisAction;
+      const otpHisInput = attribsHistory.otpHisInput;
+
+      const otpHistoryRepository = db.connection.getRepository('SysOtpHistory').createQueryBuilder('otpHis');
+      otpHistoryRepository.where('otpHis.active = true AND otpHis.otpHisInput = :otpHisInput ', 
+      { 
+        otpHisInput,
+        otpHisType: attribsHistory.otpHisType,
+      });
+
+      if(isAll == false) {
+        otpHistoryRepository.andWhere('otpHis.otpHisAction = :otpHisAction', {
+          otpHisAction,
+        });
+      }
+
+      otpHistoryRepository.orderBy('otpHis.otpHisId','DESC');
+      return await otpHistoryRepository.getRawMany();
+
+    } catch (error) {
+      LOGGER.error(error);
+      throw new Error(error?.message);
+    }
+  }
+
+  async clearHistoryOTP() {
+    try {
+      const timeDuration = env.FFD_OTP_BLOCK_DURATION_MINUTES;
+      return await db.connection.getRepository('SysOtpHistory')
+        .createQueryBuilder()
+        .delete() //.update().set({ active: false})
+        .where(`NOW() > otp_his_time and active = true`)
+        .execute()
+    } catch (error) {
+      LOGGER.error(error);
+      throw new Error(error?.message);
+    }
+  }
+
+  async lockPasswordByUuid(uuid) {
+    try {
+      //-- update password
+      return await db.connection.getRepository("CmsLogin").update(
+        {
+          uuidAccount: uuid,
+        },
+        {
+          status: ELoginStatus.LOCK_PWD,
+        }
+      );
+    } catch (error) {
+      LOGGER.error(error);
+      throw new Error(error?.message);
     }
   }
 }

@@ -28,6 +28,11 @@ import {
   DrawerConsentComponent,
   IContentDrawerConsent,
 } from '../../components/drawer-consent/drawer-consent.component';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { ModalAlertComponent } from '../../components/modal-alert/modal-alert.component';
+import { title } from 'process';
+import { EnvHelper } from '../../helpers/env.helper';
+import { LoginDemoComponent } from '../../pages/login-demo/login-demo.component';
 
 export interface IDataSubmitConsent {
   consentDate: string;
@@ -52,6 +57,9 @@ export interface IDataSubmitConsent {
     LabelInputLoadingComponent,
     NzDividerModule,
     CardContentComponent,
+    NzAlertModule,
+    ModalAlertComponent,
+    LoginDemoComponent,
   ],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
@@ -68,15 +76,23 @@ export class SignInComponent implements OnInit, OnDestroy {
     private lineService: LineService
   ) {}
 
+  isDemo = EnvHelper.key('isDemo');
+
   //-- private state
   private _drawerConsentRef!: Subscription;
 
   //-- public state
   lineProvider: ILineProviderEnv[] = [];
-  limitPassWrong = 5;
   passwordVisible: boolean = false;
   password?: string;
   submitLoading: boolean = false;
+
+  //-- block authen
+  authenHistory: any[] = [];
+  limitPassWrong:number = 0;
+  limitBlockedAuthenWrong:number = 0;
+  authenMsgAlert: string = '';
+  authenBlocked: boolean = false;
 
   validateForm: FormGroup<{
     userName: FormControl<string>;
@@ -105,50 +121,73 @@ export class SignInComponent implements OnInit, OnDestroy {
     this.submitLoading = true;
     if (this.validateForm.valid) {
       const { userName, password, remember } = this.validateForm.value;
-      const authenVerify = await firstValueFrom(
-        this.authenService.singInVerify(userName ?? '', password ?? '')
-      );
-      if (authenVerify) {
-        const confirmAuth = await firstValueFrom(
-          this.authenService.singInConfirmSecret(
-            userName ?? '',
-            password ?? '',
-            authenVerify.hash,
-            authenVerify.secretKey
-          )
+      const input = userName?.toLowerCase();
+
+      const auth = await firstValueFrom(this.authenService.getHistoryAuth({
+        pwdAtInput: input ?? ''
+      }));
+      if(auth) {
+        this.setObjectBlockRequest({ 
+          ...auth,
+          isView: true
+        });
+      }
+
+      if(this.authenBlocked == false) {
+        const authenVerify = await firstValueFrom(
+          this.authenService.singInVerify(input ?? '', password ?? '')
         );
 
-        //-- password wrong limit 5
-        if (!confirmAuth) {
-          this.notification.warning(
-            'แจ้งเตือน',
-            'username หรือ รหัสผ่านไม่ถูกต้อง'
-          );
-          this.limitPassWrong--;
-        }
-
-        if (confirmAuth?.token) {
-          const userInfo = await firstValueFrom(
-            this.userInfoService.setUserInfo(confirmAuth?.token)
-          );
-          if(!userInfo) {
-            this.actionErrorApi();
+        if (authenVerify) {
+          if(authenVerify?.status == 'LOCK_PWD') {
+            this._setBlockAccount();
+            this.validateForm.reset();
+            this.submitLoading = false;
+            return;
           }
 
-          console.log({
-            userInfo,
-            confirmAuth
+          const confirmAuth = await firstValueFrom(
+            this.authenService.singInConfirmSecret(
+              input ?? '',
+              password ?? '',
+              authenVerify.hash,
+              authenVerify.secretKey
+            )
+          );
+
+          //-- password wrong limit 5
+          if (!confirmAuth) {
+            this.saveHisAuthentication({
+              pwdAtHash: authenVerify.secretKey,
+              pwdAtInput: input ?? '',
+              pwdResult: false
+            }, authenVerify.secretKey);
+          }
+
+          if (confirmAuth?.token) {
+            const userInfo = await firstValueFrom(
+              this.userInfoService.setUserInfo(confirmAuth?.token)
+            );
+            if (!userInfo) {
+              this.actionErrorApi();
+            }
+
+            //-- not connect line
+            if (confirmAuth?.isLineConnect == false) {
+              this.actionRedirect();
+            }
+
+            //-- connect line
+            if (confirmAuth?.isLineConnect == true) {
+              this.checkVersionConsent(confirmAuth?.token);
+            }
+          }
+        } else {
+          this.saveHisAuthentication({
+            pwdAtInput: input ?? '',
+            pwdAtHash: null,
+            pwdResult: false
           });
-
-          //-- not connect line
-          if (confirmAuth?.isLineConnect == false) {
-            this.actionRedirect();
-          }
-
-          //-- connect line
-          if (confirmAuth?.isLineConnect == true) {
-            this.checkVersionConsent(confirmAuth?.token);
-          }
         }
       }
 
@@ -165,13 +204,59 @@ export class SignInComponent implements OnInit, OnDestroy {
     }
   }
 
+  saveHisAuthentication(attribs: {
+    pwdAtHash: string | null;
+    pwdAtInput: string;
+    pwdResult: boolean;
+  }, hasAccount?: string): void {
+    this.openModalAlert(
+      'ชื่อบัญชีผู้ใช้งาน หรือรหัสผ่านไม่ถูกต้อง',
+      'กรุณาตรวจสอบชื่อบัญชีผู้ใช้งาน หรือรหัสผ่านของท่าน และลองใหม่อีกครั้ง'
+    );
+    this.authenService.saveHistoryAuth(attribs).subscribe(auth => {
+      if(auth) {
+        this.setObjectBlockRequest(auth, hasAccount);
+      }
+    });
+  }
+
+  setObjectBlockRequest(auth: {
+    FindHistory: any[];
+    PWD_LIMIT_WRONG: number; 
+    PWD_LOCK_DURATION_MINUTES: number;
+    isView?: boolean;
+  }, hasAccount?: string) {
+    this.limitBlockedAuthenWrong = auth?.PWD_LOCK_DURATION_MINUTES ?? 1440;
+    this.limitPassWrong = auth?.PWD_LIMIT_WRONG ?? 0;
+    this.authenHistory = auth?.FindHistory ?? [];
+
+    if(this.authenBlocked == false && this.limitPassWrong > 0) {
+      const count = this.authenHistory.length;
+      const limit = this.limitPassWrong - count;
+      if(limit <= 0) {
+        this._setBlockAccount();
+        if(hasAccount) {
+          this.authenService.lockPwdByUuid({ pwdAtHash: hasAccount }).subscribe(res => {
+          })
+        }
+      }else{
+        if(auth?.isView != true) {
+          this.authenMsgAlert = `คุณสามารถกรอกข้อมูลผิดได้อีก ${limit} ครั้ง`
+        }
+      }
+    }
+  }
+
+  _setBlockAccount() {
+    this.authenBlocked = true;
+    this.authenMsgAlert = `ระบบได้ทำการระงับบัญชีของท่าน กรุณากดลืมรหัสผ่าน`;
+  }
+
   //-- check version consent
   checkVersionConsent(token: string) {
     //-- check consent
     this.consentService.checkVersion(token).subscribe((res) => {
       if (!res) {
-        console.log(' ============== actionErrorApi =============================');
-
         this.actionErrorApi();
       }
 
@@ -243,5 +328,16 @@ export class SignInComponent implements OnInit, OnDestroy {
   //-- go to landing page
   actionRedirect() {
     this.router.navigate(['/']);
+  }
+
+  isOpenModal: boolean = false;
+  modal = {
+    title: '',
+    message: ''
+  }
+  openModalAlert(title: string, message: string) {
+    this.isOpenModal = true;
+    this.modal.title = title;
+    this.modal.message = message;
   }
 }

@@ -18,8 +18,8 @@ class TypeORMService {
         database: env.DATABASE_NAME,
         schema: env.SCHEMA,
         entities: [`${__dirname}/../entities/**/*.js`],
-        synchronize: true,
-        logging: false,
+        synchronize: env.DATABASE_SYNCHRONIZE,
+        logging: env.DATABASE_LOGGING,
         ...this.extraOptions(),
       });
       this.connection = await dataSource.initialize();

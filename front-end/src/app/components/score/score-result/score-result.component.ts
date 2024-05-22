@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-score-result',
@@ -8,5 +8,6 @@ import { Component } from '@angular/core';
   styleUrl: './score-result.component.scss'
 })
 export class ScoreResultComponent {
-
+  @Input({ required: true }) score!: number;
+  @Input({ required: true }) total!: number;
 }

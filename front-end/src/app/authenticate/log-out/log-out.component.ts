@@ -21,8 +21,8 @@ export class LogOutComponent {
   }
 
   logOut() {
-    if(this.userInfoService.logoutUserInfo()){
-      this.router.navigate(['/'], { relativeTo: this.route });
+    if (this.userInfoService.logoutUserInfo()) {
+      this.router.navigate(['/auth/sign-in'], { relativeTo: this.route });
     }
   }
 }

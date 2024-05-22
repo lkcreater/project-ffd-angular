@@ -11,8 +11,8 @@ const serviceName = 'accounts';
 const { AccountsService } = require('../../../services/account.service');
 const { ELoginPlatform } = require('../../../services/authen.service');
 const { Validator } = require('node-input-validator');
-const { SecretHelper } = require('../../../helpers/secret.helper');
 const { HealthCheckService } = require('../../../services/health-check.service');
+const { RankService } = require('../../../services/rank.service');
 
 //-----------------------------------------------------------
 //-- get profile me
@@ -20,16 +20,17 @@ const { HealthCheckService } = require('../../../services/health-check.service')
 router.get('/', async (req, res, next) => {
 
     const SESSION_ID = req.sessionId;
-    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `Get profile me` }
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.socket.remoteAddress), message: `Get profile me` }
     try {
         LOGGER.info(dataLogger);
 
         const uuid = req.authen?.uuid ?? 'NONE';
         const account = await AccountsService.findAccountByUuid(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
         const peronaIcon = await HealthCheckService.getAllPersonaIconByUuid(uuid);
+        const rankHistory = await RankService.getRankByUuidAccount(uuid);
 
         //-- hidden password
         let hasPassword = false;
@@ -37,7 +38,7 @@ router.get('/', async (req, res, next) => {
             hasPassword = true;
         }
         delete account.accPassword;
-        data = { hasPassword, ...account, peronaIcon };
+        data = { hasPassword, ...account, peronaIcon ,rankHistory};
 
         RESPONSE.success(res, SESSION_ID, data, messages.success.getProfileSuccess);
     }
@@ -61,7 +62,7 @@ router.put('/update-profile', async (req, res, next) => {
         const uuid = req.authen?.uuid ?? 'NONE';
         const account = await AccountsService.findAccount(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         const attribsAccount = {
@@ -100,7 +101,7 @@ router.put('/forgot-pwd', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         const updated = await AccountsService.changePassword(req.authen?.uuid, {
@@ -132,13 +133,13 @@ router.put('/code-company', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         const uuid = req.authen?.uuid ?? 'NONE';
         const account = await AccountsService.findAccount(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         const updated = await AccountsService.updateAccountById(account.accId, {
@@ -170,28 +171,28 @@ router.post('/disconnect', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         const uuid = req.authen?.uuid ?? 'NONE';
 
         const account = await AccountsService.findAccountByUuid(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         if (account?.chanelLogin && account?.chanelLogin.length <= 1) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.disconnectOneMore);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.disconnectOneMore);
         }
 
         const id = Number(req.body?.chanelId);
         const findChanel = account?.chanelLogin?.find((c) => c.id == id);
         if (!findChanel) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         if (findChanel?.isLineLiff == true) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.disconnectLine);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.disconnectLine);
         }
 
         const chanelLogins = account?.chanelLogin.filter((c) => c.id != id);
@@ -246,11 +247,11 @@ router.post('/connect', async (req, res, next) => {
         );
         const matched = await v.check()
         if (!matched) {
-            RESPONSE.exceptionVadidate(res, SESSION_ID, v.errors);
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
         }
 
         if (!['EMAIL', 'PHONE', 'LINE'].includes(req.body.loginPlatform)) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.connectPlatform);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.connectPlatform);
         }
 
         //-- find UUID
@@ -259,7 +260,7 @@ router.post('/connect', async (req, res, next) => {
         //-- check channel login
         const account = await AccountsService.findAccountByUuid(uuid);
         if (!account) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, messages.errors.accountNotFound);
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
         }
 
         //-- new password
@@ -272,7 +273,8 @@ router.post('/connect', async (req, res, next) => {
         //-- find Exist 
         const accountExist = account?.chanelLogin.find(Exist => Exist.loginPlatform == req.body.loginPlatform);
         if (accountExist) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, 'บัญชี ' + req.body.loginPlatform + ' ของท่านถูกเชื่อมต่อแล้ว');
+            const replaceValues = [req.body.loginPlatform];
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.connectedExist, replaceValues);
         }
 
         //-- save account
@@ -293,19 +295,66 @@ router.post('/connect', async (req, res, next) => {
 //-----------------------------------------------------------
 //-- lock password
 //-----------------------------------------------------------
-router.patch('/lock-password', async (req, res, next) => {
+router.post('/lock-password', async (req, res, next) => {
 
     const SESSION_ID = req.sessionId;
     const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.connection.remoteAddress), message: `lock password` }
     try {
         LOGGER.info(dataLogger);
-        const hashText = SecretHelper.getText(
-            '$2a$10$xsYyf9pqUvLgPFoWrxBXAujq.fway8RhFNgFZHyahbHvOZ98D6Co6',
-        );
-        const hash = SecretHelper.bcryptHash(hashText);
-        data = { text: 'hello world', hash }
 
-        RESPONSE.success(res, SESSION_ID, data, 'lock password successful');
+        //-- verify body
+        const v = new Validator(req.body,
+            { chanelId: 'required' },
+        );
+        const matched = await v.check()
+        if (!matched) {
+           return RESPONSE.exceptionValidate(res, SESSION_ID, v.errors);
+        }
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+        const account = await AccountsService.findAccountByUuid(uuid);
+        if (!account) {
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        const id = Number(req.body?.chanelId);
+        const chanelLogins = account?.chanelLogin?.find((c) => c.id == id);
+
+        if (!chanelLogins) {
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+
+        //-- lock passWord 
+        await AccountsService.lockPassword(id);
+
+        RESPONSE.success(res, SESSION_ID, messages.success.lockPasswordSuccess);
+    }
+    catch (err) {
+        LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });
+        next(err);
+    }
+});
+
+//-----------------------------------------------------------
+//-- get score
+//-----------------------------------------------------------
+router.get('/score', async (req, res, next) => {
+
+    const SESSION_ID = req.sessionId;
+    const dataLogger = { meta: UTILS.generateLogMeta(SESSION_ID, req.method, serviceName, 'P', req.socket.remoteAddress), message: `Get score me` }
+    try {
+        LOGGER.info(dataLogger);
+
+        const uuid = req.authen?.uuid ?? 'NONE';
+        const account = await AccountsService.findAccountByUuid(uuid);
+        if (!account) {
+            return RESPONSE.exception(res, SESSION_ID, messages.errors.accountNotFound);
+        }
+        const rankHistory = await RankService.getRankByUuidAccount(uuid);
+
+        data = {rankHistory};
+        
+        RESPONSE.success(res, SESSION_ID, data);
     }
     catch (err) {
         LOGGER.error({ ...dataLogger, message: dataLogger.message + ' [ERR]' });

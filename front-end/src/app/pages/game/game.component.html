@@ -1,14 +1,29 @@
 <app-card-content>
-  <p class="text-center text-[30px] font-bold text-[#005DA5] my-8">
-    เลือกเรื่องที่อยากรู้
+  <div class="flex gap-2 mt-4">
+    <app-categories
+      [class.cate-select]="multiCateId.length == 0"
+      [cateMenu]="'ทั้งหมด'"
+      (click)="getBoardByAll()"
+    ></app-categories>
+    @for (cate of category; track $index) {
+    <app-categories
+      [class.cate-select]="isChooseCate(cate.gmCateId)"
+      [cateMenu]="cate.gmCateTitle"
+      (click)="getBoardByCate(cate.gmCateId)"
+    ></app-categories>
+    }
+  </div>
+  <p class="text-center text-[30px] font-bold text-[var(--color-primary)] my-8">
+    เลือกเรื่องเกมที่อยากเรียนรู้
   </p>
-  <div class="grid lg:grid-cols-4 grid-cols-1 justify-items-center gap-2">
-    <app-card-intro-game [openDetail]="false"></app-card-intro-game>
-
-    <app-card-intro-game [openDetail]="false"></app-card-intro-game>
-
-    <app-card-intro-game [openDetail]="false"></app-card-intro-game>
-
-    <app-card-intro-game [openDetail]="false"></app-card-intro-game>
+  <div class="grid lg:grid-cols-4 grid-cols-2 justify-items-center gap-3">
+    @for (data of board; track $index) {
+    <app-card-intro-game
+      [openDetail]="false"
+      [dataBoard]="data"
+      class="cursor-pointer"
+      (click)="goToPlay(data.gmBoardId)"
+    ></app-card-intro-game>
+    }
   </div>
 </app-card-content>

@@ -35,7 +35,7 @@ class ObsClientService {
       this.obs = new ObsClient({
         access_key_id: env.OBS_ACCESS_KEY_ID,
         secret_access_key: env.OBS_SECRET_ACCESS_KEY,
-        server: env.OBS_ENDPOINT,
+        server:  env.OBS_ENDPOINT.replace('{region}', env.OBS_REGION),
         max_retry_count: 5,
       });
     } catch (error) {
@@ -50,6 +50,7 @@ class ObsClientService {
         Bucket: this.bucketname,
         Key: name,
         SourceFile: tempFile,
+        ACL : ObsClient.prototype.enums.AclPublicRead,
       }, (err, result) => {
         if(err){
           return reject(err);
@@ -60,8 +61,8 @@ class ObsClientService {
     })
   }
 
-  async uploadFileImage(file) {
-    const fileKey = this.getRenameFile(file.originalname, 'image');
+  async uploadFileImage(file, subPath = undefined) {
+    const fileKey = this.getRenameFile(file.originalname, env.OBS_DYNAMIC_NAME, subPath);
     const tempFile = `./${fileKey.fileName}`;
 
     try {
@@ -113,14 +114,14 @@ class ObsClientService {
     });
   }
 
-  getRenameFile(originalName, dirName) {
+  getRenameFile(originalName, dirName, subPath) {
     const fileExtension = originalName.split('.').pop().toLowerCase();
-    const pathDate = DateTz.dateNow('YYYYMM');
+    const pathDate = subPath ? `${subPath}/${DateTz.dateNow('YYYYMM')}` : DateTz.dateNow('YYYYMM');
     const nameFile = uuidv4();
     return {
       key: nameFile,
       fileName: `${nameFile}.${fileExtension}`,
-      name: `${pathDate}/${dirName}/${nameFile}.${fileExtension}`,
+      name: `${dirName}/${pathDate}/${nameFile}.${fileExtension}`,
     };
   }
 

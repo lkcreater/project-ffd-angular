@@ -7,20 +7,20 @@
     @else {
       <i>{{ label }}</i>
     }
-    <button class="btn" type="button" (click)="isEditable = !isEditable">
+    <button class="btn" [id]="'btn-update-profile-' + inputName" type="button" (click)="isEditable = !isEditable">
       <span nz-icon class="cursor-pointer" nzType="edit"></span>
     </button>
   </div>
   } @else {
   <div class="app-input-form !mb-0">
     <nz-input-group nzSearch [nzAddOnAfter]="suffixIconButton">
-      <input type="text" nz-input [(ngModel)]="input" [placeholder]="'กรุณากรอก '+ label" />
+      <input type="text" [id]="'input-profile-' + inputName" nz-input [(ngModel)]="input" [placeholder]="'กรุณากรอก '+ label" />
     </nz-input-group>
     <ng-template #suffixIconButton>
-      <button class="btn btn-save" type="button" (click)="saveUpdate()">
+      <button class="btn btn-save" [id]="'btn-save-profile-' + inputName" type="button" (click)="saveUpdate()">
         <span nz-icon nzType="check"></span>
       </button>
-      <button class="btn btn-cancel" type="button" (click)="isEditable = !isEditable">
+      <button class="btn btn-cancel" [id]="'btn-cancel-profile-' + inputName" type="button" (click)="isEditable = !isEditable">
         <span nz-icon nzType="close"></span>
       </button>
     </ng-template>

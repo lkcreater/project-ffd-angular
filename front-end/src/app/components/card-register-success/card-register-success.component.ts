@@ -23,7 +23,12 @@ export class CardRegisterSuccessComponent implements OnInit {
     private questionnaireService: QuestionnaireService
   ) {}
 
-  imageWelcome = './assets/persona/welcome-success.png'
+  //-- link image
+  imageWelcome = './assets/persona/welcome-success.png' 
+  imageHcTitle = './assets/question/welcom-hc-title.png'
+  imageHcIcon = './assets/question/welcom-hc-icon.png'
+  textDetail = 'ให้ Freedom by TISCO ช่วยคุณหาคำตอบ กับแพลตฟอร์มที่จะช่วยให้คุณรู้จักตัวเอง';
+
   userInfo!: IUserInfoData<IInfoProfile>;
   account!: IInfoProfile;
 

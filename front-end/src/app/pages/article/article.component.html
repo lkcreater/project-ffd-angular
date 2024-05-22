@@ -1,0 +1,33 @@
+<app-card-content>
+  <div class="flex gap-2 mt-4">
+    <app-categories
+      [class.cate-select]="multiCateId.length == 0"
+      [cateMenu]="'ทั้งหมด'"
+      (click)="getBoardByAll()"
+    ></app-categories>
+    @for (cate of category; track $index) {
+    <app-categories
+      [class.cate-select]="isChooseCate(cate.gmCateId)"
+      [cateMenu]="cate.gmCateTitle"
+      (click)="getBoardByCate(cate.gmCateId)"
+    ></app-categories>
+    }
+  </div>
+
+  <div class="display">
+    <p
+      class="text-center text-[30px] font-bold text-[var(--color-primary)] my-8"
+    >
+      เลือกเรื่องที่อยากเรียนรู้
+    </p>
+    <div class="grid grid-cols-1 gap-4">
+      @for (content of contents; track $index) {
+        <app-video 
+          [url]="content.link" 
+          [title]="content.title"
+          [cateName]="getNameCategory(content.gmCateId)"
+          />
+      }
+    </div>
+  </div>
+</app-card-content>

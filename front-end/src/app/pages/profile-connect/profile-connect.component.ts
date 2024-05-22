@@ -1,10 +1,18 @@
-import { Component, Inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import {
+  Component,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild,
+} from '@angular/core';
+import {
+  AbstractControl,
   FormControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,
   ReactiveFormsModule,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -41,7 +49,7 @@ interface IStateObject {
     CardContentComponent,
   ],
   templateUrl: './profile-connect.component.html',
-  styleUrl: './profile-connect.component.scss'
+  styleUrl: './profile-connect.component.scss',
 })
 export class ProfileConnectComponent implements OnInit {
   @ViewChild(CardOtpVarifyComponent)
@@ -61,13 +69,10 @@ export class ProfileConnectComponent implements OnInit {
     private profileService: ProfileService
   ) {
     if (isPlatformBrowser(this.platformId)) {
-      this.stateObject = this.router.getCurrentNavigation()?.extras.state as IStateObject;
-      if(!this.stateObject) {
-        this.notification.create(
-          'warning',
-          'แจ้งเตือน',
-          'route is wrong.'
-        );
+      this.stateObject = this.router.getCurrentNavigation()?.extras
+        .state as IStateObject;
+      if (!this.stateObject) {
+        this.notification.create('warning', 'แจ้งเตือน', 'route is wrong.');
         this.router.navigate(['/profile']);
       }
     }
@@ -75,17 +80,46 @@ export class ProfileConnectComponent implements OnInit {
 
   ngOnInit(): void {
     this._token = this.userInfoService.getToken();
-    this.userInfoService.getUserInfo().subscribe(user => {
-      if(user?.userInfo?.hasPassword == false) {
+    this.userInfoService.getUserInfo().subscribe((user) => {
+      if (user?.userInfo?.hasPassword == false) {
         this._newPassword = true;
       }
     });
 
     this.type = this.stateObject?.type as 'EMAIL' | 'PHONE';
     this.label = this.constrant[this.type] ?? '';
+
+    if (['EMAIL', 'PHONE'].includes(this.type)) {
+      console.log('this loop ===>', this.type);
+      this.validateForm = this.fb.group({
+        userName: ['', [this.customValidator]],
+      });
+    }
   }
 
-  //-- private state 
+  customValidator: ValidatorFn = (control: AbstractControl) => {
+    if (!control.value) {
+      return { error: true, message: 'กรุณากรอก ' + this.label };
+    } else if (control.value) {
+      let regex;
+      if (this.type == 'EMAIL') {
+        regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      }
+      if (this.type == 'PHONE') {
+        regex = /^[0-9]{10}$/;
+      }
+      if (!regex?.test(control.value)) {
+        return {
+          error: true,
+          message: 'กรุณากรอกรูปแบบ ' + this.label + ' ให้ถูกต้อง',
+        };
+      } else {
+        return null;
+      }
+    }
+    return {};
+  };
+  //-- private state
   _token!: string | null;
   _newPassword: boolean = false;
 
@@ -113,30 +147,33 @@ export class ProfileConnectComponent implements OnInit {
     isExistAlready: true,
     token: '',
     type: 'EMAIL',
-  }
-
+  };
 
   setupInput(object: object) {
     this.inputObject = {
       ...this.inputObject,
-      ...object
-    }
+      ...object,
+    };
   }
 
   submitNextForm(): void {
     //-- step input
     if (this.stepNext == 'input') {
       if (this.validateForm.valid) {
-        const input = this.validateForm.controls.userName.value;
-        this.authenService.verifyInput(input).subscribe(res => {
-          if(res && res.isExistAlready == false){
+        const inputData = this.validateForm.controls.userName.value;
+        const input = inputData.toLowerCase();
+        this.authenService.verifyInput(input).subscribe((res) => {
+          if (res && res.isExistAlready == false) {
             this.setupInput({
               input: input,
-              ...res
-            })
+              ...res,
+            });
             this.stepNext = 'otp';
-          }else if(res && res.isExistAlready == true){
-            this.notification.warning('แจ้งเตือน', 'บัญชีนี้ถูกใช้งานแล้ว กรุณาลองใหม่');
+          } else if (res && res.isExistAlready == true) {
+            this.notification.warning(
+              'แจ้งเตือน',
+              'บัญชีนี้ถูกใช้งานแล้ว กรุณาลองใหม่'
+            );
           }
         });
       } else {
@@ -163,13 +200,13 @@ export class ProfileConnectComponent implements OnInit {
   //-- step OTP
   onOtpSubmit(data: { verify: boolean; secret: string; otp: string }) {
     if (data.verify) {
-      if(this._newPassword == true) {
+      if (this._newPassword == true) {
         this.stepNext = 'password';
-      }else {
+      } else {
         this.onSubmitSuccess({
           loginData: this.inputObject.input,
-          loginPlatform: this.stateObject.type
-        })
+          loginPlatform: this.stateObject.type,
+        });
       }
     } else {
       this.notification.warning(
@@ -180,46 +217,52 @@ export class ProfileConnectComponent implements OnInit {
   }
 
   //-- step new password
-  onNewPassword(data: { password: string; confirmPassword: string; hash: string }) {
-    if(!this.inputObject.token) {
-      this.notification.warning(
-        'แจ้งเตือน',
-        'เกิดข้อผิดพลาดจากระบบ'
-      );
+  onNewPassword(data: {
+    password: string;
+    confirmPassword: string;
+    hash: string;
+  }) {
+    if (!this.inputObject.token) {
+      this.notification.warning('แจ้งเตือน', 'เกิดข้อผิดพลาดจากระบบ');
     }
 
     this.onSubmitSuccess({
       loginData: this.inputObject.input,
       loginPlatform: this.stateObject.type,
-      accPassword: data.hash
-    })
+      accPassword: data.hash,
+    });
   }
 
   //-- step info
-  onSubmitSuccess(data: { loginData: string; loginPlatform: TChanelAuthen; accPassword?: string }) {
-    if(this._token){
-      this.profileService.connectAccount(this._token, data).subscribe(res => {
+  onSubmitSuccess(data: {
+    loginData: string;
+    loginPlatform: TChanelAuthen;
+    accPassword?: string;
+  }) {
+    if (this._token) {
+      this.profileService.connectAccount(this._token, data).subscribe((res) => {
         if (res && this._token) {
-          this.userInfoService.setUserInfo(this._token).subscribe(userInfo => {
-            if(userInfo){
-              this.stepNext = 'success';
-              this.notification.success(
-                'แจ้งเตือน',
-                'บันทึกข้อมูลผู้ใช้สำเร็จ'
-              );
-              setTimeout(() => {
-                this.router.navigate(['/profile']);
-              }, 1000);
-            }
-          });
+          this.userInfoService
+            .setUserInfo(this._token)
+            .subscribe((userInfo) => {
+              if (userInfo) {
+                this.stepNext = 'success';
+                this.notification.success(
+                  'แจ้งเตือน',
+                  'บันทึกข้อมูลผู้ใช้สำเร็จ'
+                );
+                setTimeout(() => {
+                  this.router.navigate(['/profile']);
+                }, 1000);
+              }
+            });
         } else {
           this.notification.warning(
             'แจ้งเตือน',
             'การบันทึกข้อมูลผู้ใช้งานเกิดข้อผิดพลาด'
           );
         }
-      })
+      });
     }
   }
 }
-

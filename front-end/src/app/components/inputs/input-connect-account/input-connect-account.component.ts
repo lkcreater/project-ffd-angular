@@ -24,6 +24,7 @@ interface IObjectConnect {
   styleUrl: './input-connect-account.component.scss'
 })
 export class InputConnectAccountComponent implements OnInit  {
+  @Input() index: number = 0;
   @Input({ required: true }) type!: TChanelAuthen;
   @Input({ required: true }) data!: IChannelConnectAccount;
   @Output() onAction = new EventEmitter<IChannelConnectAccount>();

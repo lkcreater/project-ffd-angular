@@ -1,0 +1,30 @@
+<nz-modal
+  nzClassName="app-modal-alert"
+  [(nzVisible)]="visible"
+  [nzClosable]="false"
+  [nzFooter]="null"
+  [nzMaskClosable]="false"
+>
+  <ng-container *nzModalContent>
+    <div class="min-h-[230px]">
+      <img
+        class="h-[50px] mx-auto mb-5"
+        [src]="iconAlertDanger"
+        alt="danger alert"
+      />
+
+      <h1 class="text-[22px] text-[var(--color-border)]">{{ title }}</h1>
+      <p class="text-[18px] text-[var(--color-btn-save)] mt-3" [innerHTML]="desc"></p>
+    </div>
+    <div class="flex justify-center">
+        <button
+          type="button"
+          id="btn-action-alert-modal"
+          class="btn-app btn-primary w-full sm:w-6/12 xs:w-6/12"
+          (click)="handleAction()"
+        >
+            {{ btnLabel }}
+        </button>
+    </div>
+  </ng-container>
+</nz-modal>

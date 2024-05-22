@@ -1,18 +1,17 @@
 <app-card-content [hiddenMenu]="true">
   <div class="display">
-
     <!-- step input -->
     @if(stepNext == 'input') {
     <!-- icon -->
     <div class="text-center mb-9">
-      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon">
+      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon" />
     </div>
 
     <div class="title mb-7">ลงทะเบียนด้วย{{ label }}</div>
     <form nz-form nzLayout="vertical" [formGroup]="validateForm">
       <nz-form-item class="app-input-form">
         <nz-form-label>{{ label }}</nz-form-label>
-        <nz-form-control [nzErrorTip]="'กรุณากรอก ' + label">
+        <nz-form-control [nzErrorTip]="validateMsgTemplate">
           <input
             nz-input
             id="input-userName"
@@ -23,64 +22,75 @@
             [maxlength]="type == 'PHONE' ? 10 : 255"
           />
         </nz-form-control>
+        <ng-template #validateMsgTemplate let-controlPassword>
+          @if (controlPassword.errors) {
+          {{ controlPassword.errors?.['message'] }}
+          }
+        </ng-template>
       </nz-form-item>
     </form>
     }
 
     <!-- step otp -->
     @if(stepNext == 'otp') {
-      <!-- icon -->
+    <!-- icon -->
     <div class="text-center mb-9">
-      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon">
+      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon" />
     </div>
 
-      <div class="title">ยืนยันตัวตน</div>
-      <app-card-otp-varify
-        [token]="inputObject.token"
-        [type]="inputObject.type"
-        [input]="inputObject.input"
-        (onSubmit)="onOtpSubmit($event)"
-      />
+    <div class="title">ยืนยันตัวตน</div>
+    <app-card-otp-varify
+      typeOtp="SIGN_UP"
+      [token]="inputObject.token"
+      [type]="inputObject.type"
+      [input]="inputObject.input"
+      (onSubmit)="onOtpSubmit($event)"
+    />
     }
 
     <!-- step password -->
     @if(stepNext == 'password') {
-      <!-- icon -->
+    <!-- icon -->
     <div class="text-center mb-9">
-      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon">
+      <img class="mx-auto w-40" [src]="logoImage" alt="ffd-icon" />
     </div>
-    
+
     <div class="title mb-7">ตั้งรหัสผ่าน</div>
     <app-input-set-password (onValid)="onNewPassword($event)" />
     }
 
     <!-- step info -->
     @if(stepNext == 'info') {
-    <app-input-info-profile (onSubmit)="onSubmitUserInfo($event)"/>
+    <app-input-info-profile (onSubmit)="onSubmitUserInfo($event)" />
     }
 
     <!-- step success -->
     @if(stepNext == 'success') {
-      <div class="items-center pt-28">
-        <img [src]="successImage" class="w-44 h-44 mx-auto" /> 
-        <div class="title mt-7 text-center">ลงทะเบียนสำเร็จ</div>
-      </div>
+    <div class="items-center pt-28">
+      <img [src]="successImage" class="w-44 h-44 mx-auto" />
+      <div class="title mt-7 text-center">ลงทะเบียนสำเร็จ</div>
+    </div>
     }
   </div>
 
   @if(stepNext != 'success') {
-    <div footer>
-      <div class="display-footer">
-        <button
-          id="btn-next-register"
-          type="button"
-          class="btn-app btn-primary w-full"
-          (click)="submitNextForm()"
-        >
-          <span>ถัดไป</span>
-        </button>
-      </div>
+  <div footer>
+    <div class="display-footer">
+      <button
+        id="btn-next-register"
+        type="button"
+        class="btn-app btn-primary w-full"
+        (click)="submitNextForm()"
+      >
+        <span>ถัดไป</span>
+      </button>
     </div>
+  </div>
   }
 </app-card-content>
 
+<app-modal-alert 
+  [(visible)]="isOpenModal" 
+  [title]="modal.title"
+  [desc]="modal.message"
+/>

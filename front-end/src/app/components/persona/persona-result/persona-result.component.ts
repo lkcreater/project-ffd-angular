@@ -12,6 +12,7 @@ import { UploadService } from '../../../services/upload/upload.service';
 })
 export class PersonaResultComponent {
   @Input({ required: true }) persona!: IPeronaIcon;
+  @Input() hiddenFooter: boolean = false;
 
   constructor(private uploadService: UploadService) {}
 

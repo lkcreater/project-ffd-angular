@@ -1,9 +1,10 @@
 const { Validator } = require('node-input-validator');
 const { JwtHelper } = require('../helpers/jwt.helper');
 const { AccountsService } = require('../services/account.service');
-
+const messages = require("../commons/message");
 const RESPONSE = require('../middleware/response');
 const { TempSecretService } = require('../services/temp-secret.service');
+const CODE_ERROR_TOKEN = 40300;
 
 //----------------------------------------------------------------
 //-- middle for token
@@ -17,7 +18,7 @@ const authenMiddleware = async (req, res, next) => {
         });
         const matched = await validation.check()
         if (!matched) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, validation.errors);
+            return RESPONSE.exceptionValidate(res, SESSION_ID, validation.errors);
         }
         const authorizationHeader = req.headers.authorization ?? null;
         if (authorizationHeader.startsWith('Bearer ')) {
@@ -25,13 +26,19 @@ const authenMiddleware = async (req, res, next) => {
 
             const objectJwt = JwtHelper.verifyToken(token);
             if (objectJwt.status == false) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, 'token error');
+                return RESPONSE.exception(res, SESSION_ID, {
+                    code: CODE_ERROR_TOKEN,
+                    message: messages.errors.tokenError
+                });
             }
 
             const uuidAccount = objectJwt?.verify?.uuid || 'NONE';
             const authenAccount = await AccountsService.findAccountAuthenByUuid(uuidAccount);
             if (!authenAccount) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, 'account not found!');
+                return RESPONSE.exception(res, SESSION_ID, {
+                    code: CODE_ERROR_TOKEN,
+                    message: messages.errors.accountNotFound
+                });
             }
 
             req.authen = {
@@ -58,7 +65,7 @@ const authenMiddlewareTemp = async (req, res, next) => {
         });
         const matched = await validation.check()
         if (!matched) {
-            return RESPONSE.exceptionVadidate(res, SESSION_ID, validation.errors);
+            return RESPONSE.exceptionValidate(res, SESSION_ID, validation.errors);
         }
         const authorizationHeader = req.headers.authorization ?? null;
         if (authorizationHeader.startsWith('Bearer ')) {
@@ -66,7 +73,10 @@ const authenMiddlewareTemp = async (req, res, next) => {
 
             const objectJwt = JwtHelper.verifyToken(token);
             if (objectJwt.status == false) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, 'token error');
+                return RESPONSE.exception(res, SESSION_ID, {
+                    code: CODE_ERROR_TOKEN,
+                    message: messages.errors.tokenError
+                });
             }
 
             //-- delete temp expired
@@ -76,7 +86,10 @@ const authenMiddlewareTemp = async (req, res, next) => {
             const uuidTemp = objectJwt?.verify?.uuid || 'NONE';
             const tempToken = await TempSecretService.findTempByUUID(uuidTemp);
             if (!tempToken) {
-                return RESPONSE.exceptionVadidate(res, SESSION_ID, 'secret temp expired');
+                return RESPONSE.exception(res, SESSION_ID, {
+                    code: CODE_ERROR_TOKEN,
+                    message: messages.errors.secretTempExpired
+                });
             }
             req.temp = objectJwt.verify;
         }

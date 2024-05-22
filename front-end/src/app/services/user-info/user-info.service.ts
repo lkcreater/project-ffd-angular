@@ -89,23 +89,24 @@ export class UserInfoService {
     }
   ) {
     return this.http
-      .put<IApiResponse<{
-        generatedMaps: any[],
-        raw: any[],
-        affected: number
-      }>>('accounts/update-profile', body, {
+      .put<
+        IApiResponse<{
+          generatedMaps: any[];
+          raw: any[];
+          affected: number;
+        }>
+      >('accounts/update-profile', body, {
         headers: ApiHelper.header({ token }),
       })
       .pipe(map((res) => this.utilsService.handleResponse(res)));
   }
 
   //-- fetch user info by cookie
-  fetchUserInfo() { 
+  fetchUserInfo() {
     if (this.cookieService.check(CookieHelper.keyAuthen())) {
       const token = this.cookieService.get(CookieHelper.keyAuthen());
       return this.setUserInfo(token);
     }
     return of(null);
   }
-
 }

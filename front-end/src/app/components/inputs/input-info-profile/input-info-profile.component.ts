@@ -1,5 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -20,13 +26,12 @@ import { IUserInfoData } from '../../../stores/user-info/user-info.reducer';
     CardAvatarComponent,
   ],
   templateUrl: './input-info-profile.component.html',
-  styleUrl: './input-info-profile.component.scss'
+  styleUrl: './input-info-profile.component.scss',
 })
 export class InputInfoProfileComponent implements OnInit {
-
   @Output() onSubmit = new EventEmitter<{
-    status: boolean,
-    updated: any
+    status: boolean;
+    updated: any;
   }>();
 
   constructor(
@@ -48,14 +53,13 @@ export class InputInfoProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.token = this.userInfoService.getToken() ?? '';
-    this.userInfoService.getUserInfo().subscribe(res => {
+    this.userInfoService.getUserInfo().subscribe((res) => {
       this.userInfoData = res;
-      this.validateForm.controls.userName.setValue(this.userInfoData.userInfo?.accFirstname);
     });
   }
 
-  onUploadAvatar(data: { file: File, preview: string }) {
-    if(data.file) {
+  onUploadAvatar(data: { file: File; preview: string }) {
+    if (data.file) {
       this.fileAvatar = data.file;
     }
   }
@@ -64,33 +68,37 @@ export class InputInfoProfileComponent implements OnInit {
     if (this.validateForm.valid && this.token) {
       let image = null;
 
-      if(this.fileAvatar) {
+      if (this.fileAvatar) {
         let formData = new FormData();
         formData.append('file', this.fileAvatar);
-        image = await firstValueFrom(this.uploadService.uploadFormData(this.token, formData))
+        image = await firstValueFrom(
+          this.uploadService.uploadFormData(this.token, formData)
+        );
       }
 
       let body = {
-        accFirstname: this.validateForm.controls.userName.value
-      }
-      if(image){
+        accFirstname: this.validateForm.controls.userName.value,
+      };
+      if (image) {
         Object.assign(body, {
-          accPicture: image.file
-        })
+          accPicture: image.file,
+        });
       }
-      const updated = await firstValueFrom(this.userInfoService.updateProfile(this.token, body));
-      if(updated) {
-        this.userInfoService.setUserInfo(this.token).subscribe(userInfo => {
+      const updated = await firstValueFrom(
+        this.userInfoService.updateProfile(this.token, body)
+      );
+      if (updated) {
+        this.userInfoService.setUserInfo(this.token).subscribe((userInfo) => {
           this.onSubmit.emit({
             status: true,
-            updated
-          })
+            updated,
+          });
         });
-      }else{
+      } else {
         this.onSubmit.emit({
           status: false,
-          updated
-        })
+          updated,
+        });
       }
     } else {
       Object.values(this.validateForm.controls).forEach((control) => {

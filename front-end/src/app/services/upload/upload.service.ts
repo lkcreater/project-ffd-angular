@@ -30,6 +30,17 @@ export class UploadService {
     return link
   }
 
+  loadPreviewImage(url: string) {
+    let img = new Image();
+    img.onload = (done) => {
+      console.log('done -> ', url, done);
+    }
+    img.onerror = (err) => {
+      console.log('err -> ', err);
+    }
+    img.src = url;
+  }
+
   getConfiguration() {
     return this.http
       .get<
